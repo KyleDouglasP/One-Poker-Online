@@ -94,16 +94,6 @@ export default function Table() {
 
   }
 
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    const fetchMessage = async () => {
-      const response = await getHelloMessage();
-      setMessage(response); // Set the response from the backend
-    };
-    fetchMessage();
-  }, []);
-
   return (
     <div className="table">
       {/*Opponent Lights*/}
@@ -124,7 +114,7 @@ export default function Table() {
       </div>
       {/*Player Cards*/}
       <div className="footer">
-        <HandCard cardValue={message || 'Loading...'} selected={cardSelection[0]} onCardClick={() => handleCardClick(0)}/>
+        <HandCard cardValue={hand[0]} selected={cardSelection[0]} onCardClick={() => handleCardClick(0)}/>
         <HandCard cardValue={hand[1]} selected={cardSelection[1]} onCardClick={() => handleCardClick(1)}/>
       </div>
       <button onClick={handlePlayCard} className="footer" style={{margin:"5px",marginLeft:"150px"}}>Play Card</button>
