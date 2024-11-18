@@ -8,7 +8,7 @@
   position: relative;
   height: 600px;
   max-width: 1000px;
-  overflow: scroll;
+  overflow: auto;
   border: 5px solid #2a503d;
   border-radius: 10px;
 }
