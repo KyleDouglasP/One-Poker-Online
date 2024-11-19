@@ -59,6 +59,14 @@ function Lives(){
 }
 
 export default function Table() {
+
+  const getMessage = async (api_call) => {
+    return await api_call();
+  };
+
+  let message1;
+  getMessage(getHelloMessage).then();
+
   const [gameState, setgameState] = useState(0);
   const [opponentHand, setOpponentHand] = useState(Array(2).fill(null));
   const [hand, setHand] = useState(Array(2).fill("test"));
