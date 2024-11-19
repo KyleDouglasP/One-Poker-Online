@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { getHelloMessage } from "./services/api";
+import { cardToAsset } from "./utils/cardMap";
+
 
 function HandCard({ selected, cardValue, onCardClick }){
   
   if(selected)return (
     <div className="card-outline container" style={{border:"2px solid yellow"}} onClick={onCardClick}>
-        {cardValue}
+        <img src={cardToAsset(cardValue)} style={{marginTop:"5px"}} width={90} height={126} alt="" />
     </div>
   )
   else return (
     <div className="card-outline container" onClick={onCardClick}>
-        {cardValue}
+        <img src={cardToAsset(cardValue)} style={{marginTop:"5px"}} width={90} height={126} alt="" />
     </div>
   )
 }
@@ -18,7 +20,7 @@ function HandCard({ selected, cardValue, onCardClick }){
 function PlayedCard({cardValue}){
   return (
     <div className="played-card-outline container">
-      {cardValue}   
+      <img src={cardToAsset(cardValue)} style={{marginTop:"5px"}} width={90} height={126} alt="" />
     </div>
   )
 }
@@ -60,16 +62,9 @@ function Lives(){
 
 export default function Table() {
 
-  const getMessage = async (api_call) => {
-    return await api_call();
-  };
-
-  let message1;
-  getMessage(getHelloMessage).then();
-
   const [gameState, setgameState] = useState(0);
   const [opponentHand, setOpponentHand] = useState(Array(2).fill(null));
-  const [hand, setHand] = useState(Array(2).fill("test"));
+  const [hand, setHand] = useState(Array(2).fill("HEARTS12"));
   const [cardSelection, setCardSelection] = useState(Array(2).fill(false));
   const [playedCards, setPlayedCards] = useState(Array(2).fill(null));
 
@@ -101,7 +96,7 @@ export default function Table() {
     setCardSelection(Array(2).fill(false));
 
   }
-
+  
   return (
     <div className="table">
       {/*Opponent Lights*/}

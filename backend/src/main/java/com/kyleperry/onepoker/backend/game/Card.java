@@ -17,6 +17,10 @@ public class Card implements Comparable<Card>{
         return this.rank;
     }
 
+    public String toString(){
+        return suit.name()+rank;
+    }
+
     @Override
     /* Returns 1 if first card wins, 2 if second card wins, 0 if they draw */
     public int compareTo(Card card){
