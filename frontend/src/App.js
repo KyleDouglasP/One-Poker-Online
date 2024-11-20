@@ -5,22 +5,22 @@ import { cardToAsset } from "./utils/cardMap";
 
 function HandCard({ selected, cardValue, onCardClick }){
   
-  if(selected)return (
+  if(selected)return ( // Nothing displayed if cardToAsset cannot return a valid filepath
     <div className="card-outline container" style={{border:"2px solid yellow"}} onClick={onCardClick}>
-        <img src={cardToAsset(cardValue)} style={{marginTop:"5px"}} width={90} height={126} alt="" />
+        <img src={cardToAsset(cardValue)} style={{marginTop:"5px", display: cardToAsset(cardValue) ? "inline" : "none"}} width={90} height={126} alt="" />
     </div>
   )
-  else return (
+  else return ( // Nothing displayed if cardToAsset cannot return a valid filepath
     <div className="card-outline container" onClick={onCardClick}>
-        <img src={cardToAsset(cardValue)} style={{marginTop:"5px"}} width={90} height={126} alt="" />
+        <img src={cardToAsset(cardValue)} style={{marginTop:"5px", display: cardToAsset(cardValue) ? "inline" : "none"}} width={90} height={126} alt="" />
     </div>
   )
 }
 
 function PlayedCard({cardValue}){
-  return (
+  return ( // Nothing displayed if cardToAsset cannot return a valid filepath
     <div className="played-card-outline container">
-      <img src={cardToAsset(cardValue)} style={{marginTop:"5px"}} width={90} height={126} alt="" />
+      <img src={cardToAsset(cardValue)} style={{marginTop:"5px", display: cardToAsset(cardValue) ? "inline" : "none"}} width={90} height={126} alt="" />
     </div>
   )
 }
@@ -64,7 +64,7 @@ export default function Table() {
 
   const [gameState, setgameState] = useState(0);
   const [opponentHand, setOpponentHand] = useState(Array(2).fill(null));
-  const [hand, setHand] = useState(Array(2).fill("HEARTS12"));
+  const [hand, setHand] = useState(Array(2).fill("SPADES1"));
   const [cardSelection, setCardSelection] = useState(Array(2).fill(false));
   const [playedCards, setPlayedCards] = useState(Array(2).fill(null));
 
