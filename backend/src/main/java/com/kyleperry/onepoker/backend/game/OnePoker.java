@@ -46,7 +46,7 @@ public class OnePoker {
     }
 
     public boolean[] getOpponentCardsUp(){
-        boolean up[] = {player2Cards[0].getRank()>6,player2Cards[1].getRank()>6};
+        boolean up[] = {player2Cards[0].getRank()>7,player2Cards[1].getRank()>6};
         return up;
     }
 
