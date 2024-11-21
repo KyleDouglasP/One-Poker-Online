@@ -20,7 +20,7 @@ function HandCard({ selected, cardValue, onCardClick }){
 function PlayedCard({cardValue}){
   return ( // Nothing displayed if cardToAsset cannot return a valid filepath
     <div className="played-card-outline container">
-      <img src={cardToAsset(cardValue)} style={{marginTop:"5px", display: cardToAsset(cardValue) ? "inline" : "none"}} width={90} height={126} alt="" />
+      <img src={require('./assets/CARDBACK.png')} style={{marginTop:"5px", display: cardValue ? "inline" : "none"}} width={90} height={126} alt="" />
     </div>
   )
 }
@@ -69,6 +69,7 @@ export default function Table() {
   const [playedCards, setPlayedCards] = useState(Array(2).fill(null));
 
   function handleCardClick(cardNumber){
+    if(playedCards[0]) return;
     const newSelection = Array(2).fill(false);
     newSelection[cardNumber] = true;
     setCardSelection(newSelection);
@@ -120,7 +121,13 @@ export default function Table() {
         <HandCard cardValue={hand[0]} selected={cardSelection[0]} onCardClick={() => handleCardClick(0)}/>
         <HandCard cardValue={hand[1]} selected={cardSelection[1]} onCardClick={() => handleCardClick(1)}/>
       </div>
-      <button onClick={handlePlayCard} className="footer" style={{margin:"5px",marginLeft:"150px"}}>Play Card</button>
+      <button 
+        onClick={handlePlayCard} 
+        className="footer" 
+        style={{margin:"5px", marginLeft:"150px", display: playedCards[0] ? "none" : "inline"}}
+      >
+        Play Card
+      </button>
     </div>
   );
 }

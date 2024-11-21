@@ -21,7 +21,7 @@
 .card-outline{
   margin: 7px;
   float: left;
-  width: 100px;
+  width: 103px;
   height: 140px;
   border: 2px solid white;
   border-radius: 10px;
@@ -31,7 +31,7 @@
 .played-card-outline{
   margin: 5px;
   float: left;
-  width: 100px;
+  width: 103px;
   height: 140px;
   border: 2px dotted #182e23;
   border-radius: 10px;
