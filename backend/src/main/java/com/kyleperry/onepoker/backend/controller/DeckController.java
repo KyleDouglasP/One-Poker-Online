@@ -3,8 +3,28 @@ package com.kyleperry.onepoker.backend.controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kyleperry.onepoker.backend.game.OnePoker;
+
 @RestController
 public class DeckController {
+
+    OnePoker game;
+    
+    @GetMapping("/api/begin")
+    public void beginGame() {
+        game = new OnePoker(0); // Temporarily in BOT_MODE
+    }
+
+    @GetMapping("/api/play")
+    public void playCard(int index){
+        game.playCard(index);
+    }
+
+    @GetMapping("/api/opponentcard")
+    public String getOpponentCard(){
+        return game.getOpponentCard().toString();
+    }
+
 
     /* TODO */
     

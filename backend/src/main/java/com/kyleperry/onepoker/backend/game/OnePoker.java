@@ -1,6 +1,5 @@
 package com.kyleperry.onepoker.backend.game;
 
-
 public class OnePoker {
 
     final int BOT_MODE = 0;
@@ -32,9 +31,18 @@ public class OnePoker {
         if(mode == BOT_MODE){
             player1PlayedCard = player1Cards[index];
             player1Cards[index] = null;
+            // Temporary 50/50 logic for AI opponent
+            double player2Chance = Math.random();
+            int player2CardIndex = (player2Chance<.5 ? 0 : 1);
+            player2PlayedCard = player2Cards[player2CardIndex];
+            player2Cards[player2CardIndex] = null;
         } else if (mode == ONLINE_MODE){
             /* TODO */
         }
+    }
+
+    public Card getOpponentCard(){
+        return player2PlayedCard;
     }
 
     /* Returns 1 if first card wins, 2 if second card wins, 0 if they draw */
