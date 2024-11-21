@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { getHelloMessage } from "./services/api";
-import { cardToAsset } from "./utils/cardMap";
+import { beginGame, getOpponentCardsUp, getOpponentPlayedCard, playCard } from "./services/api";
+import { cardToAsset } from "./utils/util";
 
 
 function HandCard({ selected, cardValue, onCardClick }){
@@ -39,8 +39,8 @@ function LightBox({ opponentCards }){
           UP
         </div>
         <div className="light-box">
-          <Light on={true}/>
-          <Light on={false}/>
+          <Light on={opponentCards[0]||opponentCards[1]}/>
+          <Light on={opponentCards[0]&&opponentCards[1]}/>
         </div>
       </div>
       <div>
@@ -48,8 +48,8 @@ function LightBox({ opponentCards }){
           DOWN
         </div>
         <div className="light-box">
-          <Light on={true}/>
-          <Light on={false}/>
+          <Light on={!opponentCards[0]||!opponentCards[1]}/>
+          <Light on={!opponentCards[0]&&!opponentCards[1]}/>
         </div>
       </div>
     </>
@@ -62,11 +62,35 @@ function Lives(){
 
 export default function Table() {
 
+  
+
   const [gameState, setgameState] = useState(0);
   const [opponentHand, setOpponentHand] = useState(Array(2).fill(null));
-  const [hand, setHand] = useState(Array(2).fill("SPADES1"));
+  const [hand, setHand] = useState(Array(2).fill(null));
   const [cardSelection, setCardSelection] = useState(Array(2).fill(false));
   const [playedCards, setPlayedCards] = useState(Array(2).fill(null));
+
+  /* Test Code for API calls with parameters */
+
+  const [data, setData] = useState(null); // State to store the data
+  const [loading, setLoading] = useState(true); // State for loading state
+  const [error, setError] = useState(null); // State for error handling
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const cards = await beginGame();
+        setHand(cards);
+        const opponentUp = await getOpponentCardsUp();
+        setOpponentHand(opponentUp);
+      } catch (error) {
+        setError('Failed to begin the game'); // Handle the error
+      } finally {
+        setLoading(false); // Set loading to false once data is fetched or error occurs
+      }
+    };
+    getData();
+  }, []); // Empty dependency array means that useEffect only runs on the first render!
 
   function handleCardClick(cardNumber){
     if(playedCards[0]) return;
@@ -75,26 +99,37 @@ export default function Table() {
     setCardSelection(newSelection);
   }
 
-  function handlePlayCard(){
+  async function handlePlayCard(){
     let playedCard = null;
     const newHand = hand.slice();
     if(cardSelection[0]){
       playedCard = hand[0];
       newHand[0]=null;
+      await playCard(0);
     }
     else if(cardSelection[1]){
       playedCard = hand[1];
       newHand[1]=null;
+      await playCard(1);
     }
     else return;
 
     setHand(newHand);
 
+    const newOpponentCard = await getOpponentPlayedCard();
+
     const newPlayedCards = playedCards.slice();
     newPlayedCards[0]=playedCard;
+    setCardSelection(Array(2).fill(false));
     setPlayedCards(newPlayedCards);
 
-    setCardSelection(Array(2).fill(false));
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+
+    const newNewPlayedCards = newPlayedCards.slice();
+    newNewPlayedCards[1]=newOpponentCard;
+    setPlayedCards(newNewPlayedCards); 
+
+    /* TODO: Code winning hand logic */
 
   }
   
@@ -102,7 +137,7 @@ export default function Table() {
     <div className="table">
       {/*Opponent Lights*/}
       <div className="container" style={{marginTop:"5px"}}>
-          <LightBox/>
+          <LightBox opponentCards={opponentHand}/>
       </div>
       {/*Opponent Played Card*/}
       <div className="container" style={{marginTop:"30px"}}>
