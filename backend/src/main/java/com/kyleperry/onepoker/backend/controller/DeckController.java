@@ -32,6 +32,11 @@ public class DeckController {
         return game.getOpponentPlayedCard().toString();
     }
 
+    @GetMapping("/api/handwinner")
+    public String getWinnerOfHand(){
+        /* TODO */
+        return null;
+    }
 
     /* TODO */
     
