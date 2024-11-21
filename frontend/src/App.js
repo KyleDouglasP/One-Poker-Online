@@ -60,9 +60,7 @@ function Lives(){
 
 }
 
-export default function Table() {
-
-  
+export default function Table() {  
 
   const [gameState, setgameState] = useState(0);
   const [opponentHand, setOpponentHand] = useState(Array(2).fill(null));
