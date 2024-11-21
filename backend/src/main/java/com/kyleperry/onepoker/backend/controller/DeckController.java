@@ -35,7 +35,10 @@ public class DeckController {
     @GetMapping("/api/handwinner")
     public String getWinnerOfHand(){
         /* TODO */
-        return null;
+        int comparison = game.decideWinner();
+        if (comparison==1) return "You";
+        else if (comparison==-1) return "Opponent";
+        else return "Draw";
     }
 
     /* TODO */
