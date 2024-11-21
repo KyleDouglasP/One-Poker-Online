@@ -41,7 +41,16 @@ public class OnePoker {
         }
     }
 
-    public Card getOpponentCard(){
+    public Card[] getCards(){
+        return player1Cards;
+    }
+
+    public boolean[] getOpponentCardsUp(){
+        boolean up[] = {player2Cards[0].getRank()>6,player2Cards[1].getRank()>6};
+        return up;
+    }
+
+    public Card getOpponentPlayedCard(){
         return player2PlayedCard;
     }
 

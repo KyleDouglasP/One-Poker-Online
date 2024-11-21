@@ -11,8 +11,15 @@ public class DeckController {
     OnePoker game;
     
     @GetMapping("/api/begin")
-    public void beginGame() {
+    public String[] beginGame() {
         game = new OnePoker(0); // Temporarily in BOT_MODE
+        String cards[] = {game.getCards()[0].toString(), game.getCards()[1].toString()};
+        return cards;
+    }
+
+    @GetMapping("/api/opponenthand")
+    public boolean[] opponentHand() {
+        return game.getOpponentCardsUp();
     }
 
     @GetMapping("/api/play")
@@ -22,7 +29,7 @@ public class DeckController {
 
     @GetMapping("/api/opponentcard")
     public String getOpponentCard(){
-        return game.getOpponentCard().toString();
+        return game.getOpponentPlayedCard().toString();
     }
 
 
