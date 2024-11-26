@@ -64,8 +64,12 @@ function LightBox({ opponentCards }){
   );
 }
 
-function Lives(){
+function LivesBox({lives}){
+  /* TODO */
+}
 
+function Life(){
+  /* TODO */
 }
 
 export default function Table() {  
@@ -75,8 +79,8 @@ export default function Table() {
   const [hand, setHand] = useState(Array(2).fill(null));
   const [cardSelection, setCardSelection] = useState(Array(2).fill(false));
   const [playedCards, setPlayedCards] = useState(Array(2).fill(null));
-  const [wins, setWins] = useState(Array(2).fill(0));
   const [flip, setFlip] = useState(false);
+  const [wins, setWins] = useState(Array(2).fill(0));
 
   /* Test Code for API calls with parameters */
 

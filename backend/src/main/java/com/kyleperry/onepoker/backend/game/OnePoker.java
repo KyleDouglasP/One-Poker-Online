@@ -17,6 +17,8 @@ public class OnePoker {
     private int player2Tokens;
 
     public OnePoker(int mode){
+        player1Tokens=8;
+        player2Tokens=8;
         if(mode == BOT_MODE){
             mainDeck = new Deck();
             player1Cards = new Card[] {mainDeck.draw(),mainDeck.draw()};
