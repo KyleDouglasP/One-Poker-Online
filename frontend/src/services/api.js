@@ -36,3 +36,12 @@ export const getOpponentPlayedCard = async () => {
     console.error('API Error fetching opponent played card', error);
   }
 };
+
+export const getWinner = async () => {
+  try {
+    const winner = await axios.get(`${API_URL}/handwinner`);
+    return winner.data;
+  } catch (error) {
+    console.error('API Error retrieving winner of hand', error);
+  }
+}

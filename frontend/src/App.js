@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { beginGame, getOpponentCardsUp, getOpponentPlayedCard, playCard } from "./services/api";
+import { beginGame, getOpponentCardsUp, getOpponentPlayedCard, playCard, getWinner } from "./services/api";
 import { cardToAsset } from "./utils/util";
 
 
@@ -17,12 +17,20 @@ function HandCard({ selected, cardValue, onCardClick }){
   )
 }
 
-function PlayedCard({cardValue}){
-  return ( // Nothing displayed if cardToAsset cannot return a valid filepath
-    <div className="played-card-outline container">
-      <img src={require('./assets/CARDBACK.png')} style={{marginTop:"5px", display: cardValue ? "inline" : "none"}} width={90} height={126} alt="" />
-    </div>
-  )
+function PlayedCard({cardValue, flipState}){
+  if(flipState){
+    return ( // Nothing displayed if cardToAsset cannot return a valid filepath
+      <div className="played-card-outline container">
+        <img src={cardToAsset(cardValue)} style={{marginTop:"5px", display: cardValue ? "inline" : "none"}} width={90} height={126} alt="" />
+      </div>
+    )
+  } else {
+    return ( // Nothing displayed if cardToAsset cannot return a valid filepath
+      <div className="played-card-outline container">
+        <img src={require('./assets/CARDBACK.png')} style={{marginTop:"5px", display: cardValue ? "inline" : "none"}} width={90} height={126} alt="" />
+      </div>
+    )
+  }
 }
 
 function Light({ on }){
@@ -67,6 +75,8 @@ export default function Table() {
   const [hand, setHand] = useState(Array(2).fill(null));
   const [cardSelection, setCardSelection] = useState(Array(2).fill(false));
   const [playedCards, setPlayedCards] = useState(Array(2).fill(null));
+  const [wins, setWins] = useState(Array(2).fill(0));
+  const [flip, setFlip] = useState(false);
 
   /* Test Code for API calls with parameters */
 
@@ -89,6 +99,30 @@ export default function Table() {
     };
     getData();
   }, []); // Empty dependency array means that useEffect only runs on the first render!
+
+  // UseEffect for when both cards are played to determine winner of the hand and reset
+  useEffect(() => {
+    const winState = async () => {
+      try {
+        const winner = await getWinner();
+        const newWins = wins.slice();
+        if(winner===1) newWins[0]++;
+        else if (winner===-1) newWins[1]++;
+        setFlip(true);
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+        setWins(newWins);
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+        setPlayedCards(Array(2).fill(null));
+      } catch (error) {
+        setError('Failed to begin the game'); // Handle the error
+      } finally {
+        setLoading(false); // Set loading to false once data is fetched or error occurs
+      }
+    }
+    if(playedCards[0]&&playedCards[1]){
+      winState();
+    }
+  },[playedCards])
 
   function handleCardClick(cardNumber){
     if(playedCards[0]) return;
@@ -134,22 +168,24 @@ export default function Table() {
   return (
     <div className="table">
       {/*Opponent Lights*/}
+      Opponent wins: {wins[1]}
       <div className="container" style={{marginTop:"5px"}}>
           <LightBox opponentCards={opponentHand}/>
       </div>
       {/*Opponent Played Card*/}
       <div className="container" style={{marginTop:"30px"}}>
-        <PlayedCard cardValue={playedCards[1]}/>
+        <PlayedCard cardValue={playedCards[1]} flipState={flip}/>
       </div>
       {/*Player Played Card*/}
       <div className="container">
-        <PlayedCard cardValue={playedCards[0]}/>
+        <PlayedCard cardValue={playedCards[0]} flipState={flip}/>
       </div>
       {/*Player Tokens*/}
       <div className="container">
 
       </div>
       {/*Player Cards*/}
+      Player wins: {wins[0]}
       <div className="footer">
         <HandCard cardValue={hand[0]} selected={cardSelection[0]} onCardClick={() => handleCardClick(0)}/>
         <HandCard cardValue={hand[1]} selected={cardSelection[1]} onCardClick={() => handleCardClick(1)}/>
