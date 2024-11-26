@@ -11,6 +11,15 @@ export const beginGame = async () => {
   }
 };
 
+export const getPlayerHand = async () => {
+  try {
+    const cards = await axios.get(`${API_URL}/playerhand`);
+    return cards.data;
+  } catch (error) {
+    console.error('API Fetching player cards', error);
+  }
+};
+
 export const getOpponentCardsUp = async () => {
   try {
     const cards = await axios.get(`${API_URL}/opponenthand`);
@@ -44,4 +53,4 @@ export const getWinner = async () => {
   } catch (error) {
     console.error('API Error retrieving winner of hand', error);
   }
-}
+};

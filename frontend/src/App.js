@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { beginGame, getOpponentCardsUp, getOpponentPlayedCard, playCard, getWinner } from "./services/api";
+import { beginGame, getOpponentCardsUp, getOpponentPlayedCard, playCard, getWinner, getPlayerHand } from "./services/api";
 import { cardToAsset } from "./utils/util";
 
 
@@ -113,6 +113,8 @@ export default function Table() {
         setWins(newWins);
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
         setPlayedCards(Array(2).fill(null));
+        const newHand = await getPlayerHand();
+        setHand(newHand);
       } catch (error) {
         setError('Failed to begin the game'); // Handle the error
       } finally {

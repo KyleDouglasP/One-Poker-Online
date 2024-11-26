@@ -54,9 +54,17 @@ public class OnePoker {
         return player2PlayedCard;
     }
 
+    private void redraw(){
+        if(player1Cards[0]==null) player1Cards[0]=mainDeck.draw();
+        if(player1Cards[1]==null) player1Cards[1]=mainDeck.draw();
+        if(player2Cards[0]==null) player2Cards[0]=mainDeck.draw();
+        if(player2Cards[1]==null) player2Cards[1]=mainDeck.draw();
+    }
+
     /* Returns 1 if first card wins, 2 if second card wins, 0 if they draw */
     public int decideWinner(){
         if(player1PlayedCard!=null && player2PlayedCard!=null){
+            redraw();
             return player1PlayedCard.compareTo(player2PlayedCard);
         } else return 0;
     }

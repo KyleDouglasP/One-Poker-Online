@@ -17,6 +17,12 @@ public class DeckController {
         return cards;
     }
 
+    @GetMapping("/api/playerhand")
+    public String[] playerHand() {
+        String cards[] = {game.getCards()[0].toString(), game.getCards()[1].toString()};
+        return cards;
+    }
+
     @GetMapping("/api/opponenthand")
     public boolean[] opponentHand() {
         return game.getOpponentCardsUp();
