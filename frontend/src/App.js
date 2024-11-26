@@ -118,6 +118,7 @@ export default function Table() {
         const newLights = await getOpponentCardsUp();
         setHand(newHand);
         setOpponentHand(newLights);
+        setFlip(false);
       } catch (error) {
         setError('Failed to begin the game'); // Handle the error
       } finally {
