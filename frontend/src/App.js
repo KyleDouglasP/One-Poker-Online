@@ -108,13 +108,16 @@ export default function Table() {
         const newWins = wins.slice();
         if(winner===1) newWins[0]++;
         else if (winner===-1) newWins[1]++;
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s
         setFlip(true);
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
         setWins(newWins);
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
         setPlayedCards(Array(2).fill(null));
         const newHand = await getPlayerHand();
+        const newLights = await getOpponentCardsUp();
         setHand(newHand);
+        setOpponentHand(newLights);
       } catch (error) {
         setError('Failed to begin the game'); // Handle the error
       } finally {
