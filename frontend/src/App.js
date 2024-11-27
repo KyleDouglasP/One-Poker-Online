@@ -65,11 +65,36 @@ function LightBox({ opponentCards }){
 }
 
 function LivesBox({lives}){
-  /* TODO */
+  if(lives>16){
+    console.error('Error: Too many lives');
+    return;
+  }
+
+  let rows = Math.floor(lives/4);
+  let remaining = lives%4;
+  const lifetable = Array(rows).fill(Array(4).fill(<Life/>));
+  lifetable.push(Array(remaining).fill(<Life/>));
+  return (
+    <table>
+      {lifetable.map(item => (
+        <tr>
+          <td>{item[0]}</td>
+          <td>{item[1]}</td>
+          <td>{item[2]}</td>
+          <td>{item[3]}</td>
+        </tr>
+      ))}
+    </table>
+  )
 }
 
 function Life(){
   /* TODO */
+  return (
+    <div>
+      <span className="life"></span>
+    </div>
+  )
 }
 
 export default function Table() {  
@@ -180,7 +205,8 @@ export default function Table() {
       {/*Opponent Lights*/}
       Opponent wins: {wins[1]}
       <div className="container" style={{marginTop:"5px"}}>
-          <LightBox opponentCards={opponentHand}/>
+        <div><LivesBox lives={8}/></div>
+        <LightBox opponentCards={opponentHand}/>
       </div>
       {/*Opponent Played Card*/}
       <div className="container" style={{marginTop:"30px"}}>

@@ -82,6 +82,18 @@
   display: inline-block;
 }
 
+.life {
+  height: 30px;
+  width: 30px;
+  margin-left: 2.5px;
+  margin-right: 2.5px;
+  /* background-color: rgb(235, 65, 65);  */
+  background-image: linear-gradient(to bottom right, rgb(226, 89, 89), rgb(185, 15, 15));
+  box-shadow: -2px -2px #294939;
+  border-radius: 50%;
+  display: inline-block;
+}
+
 .footer{
   position: absolute;
   bottom: 0;
