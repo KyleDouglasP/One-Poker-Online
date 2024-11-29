@@ -105,7 +105,7 @@ export default function Table() {
   const [cardSelection, setCardSelection] = useState(Array(2).fill(false));
   const [playedCards, setPlayedCards] = useState(Array(2).fill(null));
   const [flip, setFlip] = useState(false);
-  const [wins, setWins] = useState(Array(2).fill(0));
+  const [tokens, setTokens] = useState(Array(2).fill(8));
 
   /* Test Code for API calls with parameters */
 
@@ -127,20 +127,26 @@ export default function Table() {
       }
     };
     getData();
-  }, []); // Empty dependency array means that useEffect only runs on the first render!
+  }, []); // Empty dependency array means that useEffect only runs on the first render
 
   // UseEffect for when both cards are played to determine winner of the hand and reset
   useEffect(() => {
     const winState = async () => {
       try {
         const winner = await getWinner();
-        const newWins = wins.slice();
-        if(winner===1) newWins[0]++;
-        else if (winner===-1) newWins[1]++;
+        const newTokens = tokens.slice();
+        if(winner===1){
+          newTokens[0]++;
+          newTokens[1]--;
+        } 
+        else if (winner===-1){
+          newTokens[0]--;
+          newTokens[1]++;
+        }
         await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s
         setFlip(true);
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
-        setWins(newWins);
+        setTokens(newTokens);
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
         setPlayedCards(Array(2).fill(null));
         const newHand = await getPlayerHand();
@@ -202,10 +208,10 @@ export default function Table() {
   
   return (
     <div className="table">
-      {/*Opponent Lights*/}
-      Opponent wins: {wins[1]}
       <div className="container" style={{marginTop:"5px"}}>
-        <div><LivesBox lives={8}/></div>
+        {/*Opponent Lives*/}
+        <div style={{position:"absolute", transform:"translateX(-180px)"}}><LivesBox lives={tokens[1]}/></div>
+        {/*Opponent Lights*/}
         <LightBox opponentCards={opponentHand}/>
       </div>
       {/*Opponent Played Card*/}
@@ -220,8 +226,14 @@ export default function Table() {
       <div className="container">
 
       </div>
+      {/*Player Lives*/}
+      <div 
+        className="footer"
+        style={{margin:"5px", transform:"translateX(-280px) rotate(180deg)"}}
+      >
+        <LivesBox lives={tokens[0]}/>
+      </div>
       {/*Player Cards*/}
-      Player wins: {wins[0]}
       <div className="footer">
         <HandCard cardValue={hand[0]} selected={cardSelection[0]} onCardClick={() => handleCardClick(0)}/>
         <HandCard cardValue={hand[1]} selected={cardSelection[1]} onCardClick={() => handleCardClick(1)}/>
