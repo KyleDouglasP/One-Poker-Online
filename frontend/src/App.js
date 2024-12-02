@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { beginGame, getOpponentCardsUp, getOpponentPlayedCard, playCard, getWinner, getPlayerHand } from "./services/api";
 import { cardToAsset } from "./utils/util";
+import QuantityPicker from "./components/QuantityPicker";
 
 
 function HandCard({ selected, cardValue, onCardClick }){
@@ -97,15 +98,24 @@ function Life(){
   )
 }
 
-export default function Table() {  
+export default function Table() {
 
-  const [gameState, setgameState] = useState(0);
+  const BOT = 0;
+  const ONLINE = 1;
+  
+  const SELECT_STATE = -1;
+  const PLAY_STATE = 0;
+  const WAIT_STATE = 1;
+  const CALL_STATE = 2;
+
+  const [gameState, setgameState] = useState(PLAY_STATE);
   const [opponentHand, setOpponentHand] = useState(Array(2).fill(null));
   const [hand, setHand] = useState(Array(2).fill(null));
   const [cardSelection, setCardSelection] = useState(Array(2).fill(false));
   const [playedCards, setPlayedCards] = useState(Array(2).fill(null));
   const [flip, setFlip] = useState(false);
   const [tokens, setTokens] = useState(Array(2).fill(8));
+  const [tokensSelected, setTokensSelected] = useState(1);
 
   /* Test Code for API calls with parameters */
 
@@ -226,6 +236,24 @@ export default function Table() {
       <div className="container">
 
       </div>
+      {/*Betting Options*/}
+      <div 
+        className="footer"
+        style={{margin:"7px", transform:"translateX(-450px)", display: gameState!=CALL_STATE ? "none" : "inline"}}        
+      >
+        <div style={{textAlign:"center"}}>
+          <span>
+            <button>RAISE</button>
+            <button>FOLD</button>
+          </span>
+        </div>
+        <span>
+          <text style={{margin:"5px", color:"WHITE", fontWeight:"bold"}}>TOKENS:</text>
+          <button onClick={() => setTokensSelected(tokensSelected-1)}>-</button>
+          <input style={{maxWidth:"40px", minWidth:"20px"}} readOnly type="text" value={tokensSelected}/>
+          <button onClick={() => setTokensSelected(tokensSelected+1)}>+</button>
+        </span>
+      </div>
       {/*Player Lives*/}
       <div 
         className="footer"
@@ -241,7 +269,7 @@ export default function Table() {
       <button 
         onClick={handlePlayCard} 
         className="footer" 
-        style={{margin:"5px", marginLeft:"150px", display: playedCards[0] ? "none" : "inline"}}
+        style={{margin:"7px", marginLeft:"153px", display: playedCards[0] ? "none" : "inline"}}
       >
         Play Card
       </button>

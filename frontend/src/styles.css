@@ -105,3 +105,13 @@
   margin: 5px;
   background-color: #182e23;
 }
+
+.quantity-display {
+  width: 4rem;
+  padding: .5rem;
+  font-size: 1.5rem;
+  border: 0;
+  border-top: 0 solid #dbdbdb;
+  border-bottom: 0 solid #dbdbdb;
+  text-align: center;
+}
