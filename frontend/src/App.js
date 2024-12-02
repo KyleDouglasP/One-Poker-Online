@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { beginGame, getOpponentCardsUp, getOpponentPlayedCard, playCard, getWinner, getPlayerHand } from "./services/api";
 import { cardToAsset } from "./utils/util";
-import QuantityPicker from "./components/QuantityPicker";
 
 
 function HandCard({ selected, cardValue, onCardClick }){
@@ -65,16 +64,23 @@ function LightBox({ opponentCards }){
   );
 }
 
-function LivesBox({lives}){
+function LivesBox({lives, selected}){
   if(lives>16){
     console.error('Error: Too many lives');
     return;
   }
 
-  let rows = Math.floor(lives/4);
-  let remaining = lives%4;
-  const lifetable = Array(rows).fill(Array(4).fill(<Life/>));
+  let rows = Math.floor((lives)/4);
+  let remaining = (lives)%4;
+  let lifetable = Array(rows).fill(null).map(() => Array(4).fill(<Life />));
   lifetable.push(Array(remaining).fill(<Life/>));
+  for(let i=1; i<=selected; i++){
+    if(i>remaining){
+      lifetable[rows-1-(Math.floor((i-1-remaining)/4))][4-(i-remaining-1)%4-1]=<Life selected={true}/>;
+    } else {
+      lifetable[rows][remaining-i]=<Life selected={true}/>;
+    }
+  }
   return (
     <table>
       {lifetable.map(item => (
@@ -89,11 +95,11 @@ function LivesBox({lives}){
   )
 }
 
-function Life(){
+function Life({selected}){
   /* TODO */
   return (
     <div>
-      <span className="life"></span>
+      <span className="life" style={{outline: selected ? "1px solid yellow" : "none"}}></span>
     </div>
   )
 }
@@ -220,7 +226,7 @@ export default function Table() {
     <div className="table">
       <div className="container" style={{marginTop:"5px"}}>
         {/*Opponent Lives*/}
-        <div style={{position:"absolute", transform:"translateX(-180px)"}}><LivesBox lives={tokens[1]}/></div>
+        <div style={{position:"absolute", transform:"translateX(-180px)"}}><LivesBox lives={tokens[1]} selected={0}/></div>
         {/*Opponent Lights*/}
         <LightBox opponentCards={opponentHand}/>
       </div>
@@ -239,19 +245,19 @@ export default function Table() {
       {/*Betting Options*/}
       <div 
         className="footer"
-        style={{margin:"7px", transform:"translateX(-450px)", display: gameState!=CALL_STATE ? "none" : "inline"}}        
+        style={{margin:"7px", transform:"translateX(-450px)", display: gameState!=CALL_STATE ? "inline" : "inline"}}        
       >
         <div style={{textAlign:"center"}}>
           <span>
-            <button>RAISE</button>
+            <button>{tokensSelected==1 ? "CALL" : "RAISE"}</button>
             <button>FOLD</button>
           </span>
         </div>
         <span>
           <text style={{margin:"5px", color:"WHITE", fontWeight:"bold"}}>TOKENS:</text>
-          <button onClick={() => setTokensSelected(tokensSelected-1)}>-</button>
+          <button onClick={() => setTokensSelected(tokensSelected-1)} disabled={tokensSelected==1}>-</button>
           <input style={{maxWidth:"40px", minWidth:"20px"}} readOnly type="text" value={tokensSelected}/>
-          <button onClick={() => setTokensSelected(tokensSelected+1)}>+</button>
+          <button onClick={() => setTokensSelected(tokensSelected+1)} disabled={tokensSelected==tokens[0]}>+</button>
         </span>
       </div>
       {/*Player Lives*/}
@@ -259,7 +265,7 @@ export default function Table() {
         className="footer"
         style={{margin:"5px", transform:"translateX(-280px) rotate(180deg)"}}
       >
-        <LivesBox lives={tokens[0]}/>
+        <LivesBox lives={tokens[0]} selected={tokensSelected}/>
       </div>
       {/*Player Cards*/}
       <div className="footer">
