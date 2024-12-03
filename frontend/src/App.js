@@ -216,7 +216,7 @@ export default function Table() {
 
     const newNewPlayedCards = newPlayedCards.slice();
     newNewPlayedCards[1]=newOpponentCard;
-    setPlayedCards(newNewPlayedCards); 
+    setPlayedCards(newNewPlayedCards);
 
     /* TODO: Code winning hand logic */
 
