@@ -11,10 +11,14 @@ public class OnePoker {
     private Card[] player1Cards;
     private Card player1PlayedCard;
     private int player1Tokens;
+    private int player1BetTokens;
+    private String player1PreviousAction;
 
     private Card[] player2Cards;
     private Card player2PlayedCard;
     private int player2Tokens;
+    private int player2BetTokens;
+    private String player2PreviousAction;
 
     public OnePoker(int mode){
         player1Tokens=8;
@@ -43,6 +47,10 @@ public class OnePoker {
         }
     }
 
+    public void betTokens(int tokens){
+
+    }
+
     public Card[] getCards(){
         return player1Cards;
     }
@@ -69,6 +77,10 @@ public class OnePoker {
             redraw();
             return player1PlayedCard.compareTo(player2PlayedCard);
         } else return 0;
+    }
+
+    public void fold(){
+        /* TODO */
     }
 
 }
