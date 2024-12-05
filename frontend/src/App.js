@@ -162,15 +162,19 @@ export default function Table() {
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
         setTokens(newTokens);
         setTokensBet(Array(2).fill(0));
+
+        if(tokens[0]==0||tokens[1]==0){
+          setGameState(GAME_OVER_STATE);
+          return;
+        }
+
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
         setPlayedCards(Array(2).fill(null));
         const newHand = await getPlayerHand();
         const newLights = await getOpponentCardsUp();
         setHand(newHand);
         setOpponentHand(newLights);
-
-        if(tokens[0]==0||tokens[1]==0) setGameState(GAME_OVER_STATE);
-        else setGameState(PLAY_STATE);
+        setGameState(PLAY_STATE);
 
       } catch (error) {
         setError('Failed to begin the game'); // Handle the error
@@ -222,6 +226,7 @@ export default function Table() {
 
     const gameOverState = async () => {
       await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+      setPlayedCards(Array(2).fill(null));
       const cards = await beginGame();
       setHand(cards);
       const opponentUp = await getOpponentCardsUp();
@@ -326,6 +331,7 @@ export default function Table() {
   
   return (
     <div className="table">
+      <text style={{display: tokens[0]==16||tokens[1]==16 ? "inline" : "none", color:"yellow",fontSize:"200px"}}>YOU {tokens[0]==16 ? "WIN!" : "LOSE..."}</text>
       <div className="container" style={{marginTop:"5px"}}>
         {/*Opponent Lives*/}
         <div style={{position:"absolute", transform:"translateX(-180px)"}}><LivesBox lives={tokens[1]} selected={0}/></div>
