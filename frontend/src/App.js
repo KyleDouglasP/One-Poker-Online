@@ -331,7 +331,7 @@ export default function Table() {
   
   return (
     <div className="table">
-      <text style={{display: tokens[0]==16||tokens[1]==16 ? "inline" : "none", color:"yellow",fontSize:"200px"}}>YOU {tokens[0]==16 ? "WIN!" : "LOSE..."}</text>
+      {/* <text style={{display: tokens[0]==16||tokens[1]==16 ? "inline" : "none", color:"yellow",fontSize:"200px"}}>YOU {tokens[0]==16 ? "WIN!" : "LOSE..."}</text> */}
       <div className="container" style={{marginTop:"5px"}}>
         {/*Opponent Lives*/}
         <div style={{position:"absolute", transform:"translateX(-180px)"}}><LivesBox lives={tokens[1]} selected={0}/></div>
