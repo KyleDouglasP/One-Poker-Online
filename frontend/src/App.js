@@ -115,88 +115,144 @@ export default function Table() {
   const BET_STATE = 2;
   const BET_WAIT_STATE = 3;
   const WIN_STATE = 4;
+  const GAME_OVER_STATE = 5;
 
   const CALL_OR_CHECK = true;
   const RAISE = false;
 
-  const [gameState, setgameState] = useState(PLAY_STATE);
+  const [gameState, setGameState] = useState(PLAY_STATE);
   const [opponentHand, setOpponentHand] = useState(Array(2).fill(null));
   const [hand, setHand] = useState(Array(2).fill(null));
   const [cardSelection, setCardSelection] = useState(Array(2).fill(false));
   const [playedCards, setPlayedCards] = useState(Array(2).fill(null));
-  const [flip, setFlip] = useState(false);
   const [tokens, setTokens] = useState(Array(2).fill(8));
   const [tokensSelected, setTokensSelected] = useState(1);
   const [tokensBet, setTokensBet] = useState(Array(2).fill(0));
   const [prevAction, setPrevAction] = useState(Array(2).fill(RAISE));
-  const [prevRaise, setPrevRaise] = useState(Array(2)).fill(0);
+  const [prevRaise, setPrevRaise] = useState(Array(2).fill(0));
 
   const [loading, setLoading] = useState(true); // State for loading state
   const [error, setError] = useState(null); // State for error handling
 
   useEffect(() => {
     const getData = async () => {
-      try {
-        const cards = await beginGame();
-        setHand(cards);
-        const opponentUp = await getOpponentCardsUp();
-        setOpponentHand(opponentUp);
-      } catch (error) {
-        setError('Failed to begin the game'); // Handle the error
-      } finally {
-        setLoading(false); // Set loading to false once data is fetched or error occurs
-      }
+      const cards = await beginGame();
+      setHand(cards);
+      const opponentUp = await getOpponentCardsUp();
+      setOpponentHand(opponentUp);
     };
     getData();
   }, []); // Empty dependency array means that useEffect only runs on the first render
 
   // UseEffect for when both cards are played to determine winner of the hand and reset
   useEffect(() => {
-    const betState = async () => {
-      try {
-
-      } catch (error) {
-        setError('Failed to begin the game');
-      } finally {
-        setLoading(false)
-      }
-    }
     const winState = async () => {
       try {
         const winner = await getWinner();
         const newTokens = tokens.slice();
         if(winner===1){
-          newTokens[0]++;
-          newTokens[1]--;
+          newTokens[0]+=tokensBet[0]+tokensBet[1];
         } 
         else if (winner===-1){
-          newTokens[0]--;
-          newTokens[1]++;
+          newTokens[1]+=tokensBet[0]+tokensBet[1];
+        } else {
+          newTokens[0]+=tokensBet[0];
+          newTokens[1]+=tokensBet[1];
         }
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s
-        setFlip(true);
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
         setTokens(newTokens);
+        setTokensBet(Array(2).fill(0));
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
         setPlayedCards(Array(2).fill(null));
         const newHand = await getPlayerHand();
         const newLights = await getOpponentCardsUp();
         setHand(newHand);
         setOpponentHand(newLights);
-        setFlip(false);
+
+        if(tokens[0]==0||tokens[1]==0) setGameState(GAME_OVER_STATE);
+        else setGameState(PLAY_STATE);
+
       } catch (error) {
         setError('Failed to begin the game'); // Handle the error
       } finally {
         setLoading(false); // Set loading to false once data is fetched or error occurs
       }
     }
-    if(gameState==WIN_STATE){
-      winState();
+
+    const waitState = async () => {
+      const newOpponentCard = await getOpponentPlayedCard();
+
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+
+      const newPlayedCards = playedCards.slice();
+      newPlayedCards[1]=newOpponentCard;
+      const newTokens = tokens.slice();
+      newTokens[1]--;
+      setTokens(newTokens)
+      setPlayedCards(newPlayedCards);
+      setTokensBet(Array(2).fill(1));
+
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s
+      setGameState(BET_STATE);
     }
+
+    const betWaitState = async () => {
+      const newPrevAction = prevAction.slice();
+      newPrevAction[1]=CALL_OR_CHECK;
+      setPrevAction(newPrevAction);
+
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+
+      const newTokensBet = tokensBet.slice();
+      const newTokens = tokens.slice();
+
+      if(newTokens[1]-prevRaise[0]<0){
+        newTokensBet[1]+=newTokens[1];
+        newTokens[1]=0;
+      } else {
+        newTokens[1]-=prevRaise[0];
+        newTokensBet[1]+=prevRaise[0];
+      }
+
+      setTokensBet(newTokensBet);
+      setTokens(newTokens);
+
+      setGameState(BET_STATE);
+    }
+
+    const gameOverState = async () => {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+      const cards = await beginGame();
+      setHand(cards);
+      const opponentUp = await getOpponentCardsUp();
+      setOpponentHand(opponentUp);
+      setTokens(Array(2).fill(8));
+      setGameState(PLAY_STATE);
+    }
+
+    switch(gameState){
+      case WIN_STATE:
+        winState();
+        break;
+      case WAIT_STATE:
+        waitState();
+        break;
+      case BET_WAIT_STATE:
+        betWaitState();
+        break;
+      case GAME_OVER_STATE:
+        gameOverState();
+        break;
+    }
+
   },[gameState])
 
   useEffect(() => {
-    if(prevAction[0]==CALL_OR_CHECK && prevAction[1]==CALL_OR_CHECK) setgameState(WIN_STATE);
+    const update = async () => {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+      setGameState(WIN_STATE);
+    }
+    if(prevAction[0]==CALL_OR_CHECK && prevAction[1]==CALL_OR_CHECK) update();
   }, [prevAction]);
 
   function handleCardClick(cardNumber){
@@ -235,27 +291,33 @@ export default function Table() {
     setCardSelection(Array(2).fill(false));
     setPlayedCards(newPlayedCards);
 
-    setgameState(WAIT_STATE);
-    const newOpponentCard = await getOpponentPlayedCard();
-
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
-
-    const newNewPlayedCards = newPlayedCards.slice();
-    newNewPlayedCards[1]=newOpponentCard;
-    const newNewTokens = newTokens.slice();
-    newNewTokens[1]--;
-    setTokens(newNewTokens)
-    setPlayedCards(newNewPlayedCards);
-    setTokensBet(Array(2).fill(1));
-    setgameState(BET_STATE);
+    setGameState(WAIT_STATE);
 
   }
 
   function handleBet(){
+    const newPrevRaise = prevRaise.slice();
+    const newPrevAction = prevAction.slice();
+
     if (tokensSelected==prevRaise[1]){
-      setPrevAction(CALL_OR_CHECK);
-      setPrevRaise(Array(2).fill(0));
+      newPrevRaise[0] = 0;
+      newPrevAction[0] = CALL_OR_CHECK;
+    } else {
+      newPrevRaise[0] = tokensSelected;
+      newPrevAction[0] = RAISE;
     }
+
+    setPrevRaise(newPrevRaise);
+    const newTokensBet = tokensBet.slice();
+    const newTokens = tokens.slice();
+    newTokensBet[0]=tokensBet[0]+tokensSelected;
+    newTokens[0]=tokens[0]-tokensSelected;
+    setTokensBet(newTokensBet);
+    setTokens(newTokens);
+    setTokensSelected(0);
+
+    setPrevAction(newPrevAction);
+    setGameState(BET_WAIT_STATE);
   }
 
   function handleFold(){
@@ -272,11 +334,13 @@ export default function Table() {
       </div>
       {/*Opponent Played Card*/}
       <div className="container" style={{marginTop:"30px"}}>
-        <PlayedCard cardValue={playedCards[1]} flipState={flip}/>
+        <LivesBox lives={tokensBet[1]}/>
+        <PlayedCard cardValue={playedCards[1]} flipState={gameState==WIN_STATE}/>
       </div>
       {/*Player Played Card*/}
       <div className="container">
-        <PlayedCard cardValue={playedCards[0]} flipState={flip}/>
+        <LivesBox lives={tokensBet[0]}/>
+        <span><PlayedCard cardValue={playedCards[0]} flipState={gameState==WIN_STATE}/></span>
       </div>
       {/*Betting Options*/}
       <div 
@@ -285,8 +349,8 @@ export default function Table() {
       >
         <div style={{textAlign:"center"}}>
           <span>
-            <button>{tokensSelected==0 ? "CHECK" : "RAISE"}</button>
-            <button>FOLD</button>
+            <button onClick={handleBet}>{tokensSelected==0 ? "CHECK" : tokensSelected==prevRaise[1] ? "CALL" : "RAISE"}</button>
+            <button onClick={handleFold}>FOLD</button>
           </span>
         </div>
         <span>
