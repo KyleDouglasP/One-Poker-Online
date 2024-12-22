@@ -115,7 +115,8 @@ export default function Table() {
   const BET_STATE = 2;
   const BET_WAIT_STATE = 3;
   const WIN_STATE = 4;
-  const GAME_OVER_STATE = 5;
+  const FOLD_STATE = 5;
+  const GAME_OVER_STATE = 6;
 
   const CALL_OR_CHECK = true;
   const RAISE = false;
@@ -131,56 +132,69 @@ export default function Table() {
   const [prevAction, setPrevAction] = useState(Array(2).fill(RAISE));
   const [prevRaise, setPrevRaise] = useState(Array(2).fill(0));
 
-  const [loading, setLoading] = useState(true); // State for loading state
-  const [error, setError] = useState(null); // State for error handling
-
-  useEffect(() => {
-    const getData = async () => {
-      const cards = await beginGame();
-      setHand(cards);
-      const opponentUp = await getOpponentCardsUp();
-      setOpponentHand(opponentUp);
-    };
-    getData();
-  }, []); // Empty dependency array means that useEffect only runs on the first render
+  // useEffect(() => {
+  //   const getData = async () => {
+  //     const cards = await beginGame();
+  //     setHand(cards);
+  //     const opponentUp = await getOpponentCardsUp();
+  //     setOpponentHand(opponentUp);
+  //   };
+  //   getData();
+  // }, []); // Empty dependency array means that useEffect only runs on the first render
 
   // UseEffect for when both cards are played to determine winner of the hand and reset
   useEffect(() => {
     const winState = async () => {
-      try {
-        const winner = await getWinner();
-        const newTokens = tokens.slice();
-        if(winner===1){
-          newTokens[0]+=tokensBet[0]+tokensBet[1];
-        } 
-        else if (winner===-1){
-          newTokens[1]+=tokensBet[0]+tokensBet[1];
-        } else {
-          newTokens[0]+=tokensBet[0];
-          newTokens[1]+=tokensBet[1];
-        }
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
-        setTokens(newTokens);
-        setTokensBet(Array(2).fill(0));
-
-        if(tokens[0]==0||tokens[1]==0){
-          setGameState(GAME_OVER_STATE);
-          return;
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
-        setPlayedCards(Array(2).fill(null));
-        const newHand = await getPlayerHand();
-        const newLights = await getOpponentCardsUp();
-        setHand(newHand);
-        setOpponentHand(newLights);
-        setGameState(PLAY_STATE);
-
-      } catch (error) {
-        setError('Failed to begin the game'); // Handle the error
-      } finally {
-        setLoading(false); // Set loading to false once data is fetched or error occurs
+      const winner = await getWinner();
+      const newTokens = tokens.slice();
+      if(winner===1){
+        newTokens[0]+=tokensBet[0]+tokensBet[1];
+      } 
+      else if (winner===-1){
+        newTokens[1]+=tokensBet[0]+tokensBet[1];
+      } else {
+        newTokens[0]+=tokensBet[0];
+        newTokens[1]+=tokensBet[1];
       }
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+      setTokens(newTokens);
+      setTokensBet(Array(2).fill(0));
+
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+      if(newTokens[0]==0||newTokens[1]==0){
+        setGameState(GAME_OVER_STATE);
+        return;
+      }
+
+      setPlayedCards(Array(2).fill(null));
+      const newHand = await getPlayerHand();
+      const newLights = await getOpponentCardsUp();
+      setHand(newHand);
+      setOpponentHand(newLights);
+      setGameState(PLAY_STATE);
+    }
+
+    const foldState = async () => {
+      await getWinner();
+      const newTokens = tokens.slice();
+      newTokens[1]+=tokensBet[0]+tokensBet[1];
+
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+      setTokens(newTokens);
+      setTokensBet(Array(2).fill(0));
+
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+      if(newTokens[0]==0||newTokens[1]==0){
+        setGameState(GAME_OVER_STATE);
+        return;
+      }
+
+      setPlayedCards(Array(2).fill(null));
+      const newHand = await getPlayerHand();
+      const newLights = await getOpponentCardsUp();
+      setHand(newHand);
+      setOpponentHand(newLights);
+      setGameState(PLAY_STATE);
     }
 
     const waitState = async () => {
@@ -226,13 +240,14 @@ export default function Table() {
 
     const gameOverState = async () => {
       await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
-      setPlayedCards(Array(2).fill(null));
-      const cards = await beginGame();
-      setHand(cards);
-      const opponentUp = await getOpponentCardsUp();
-      setOpponentHand(opponentUp);
-      setTokens(Array(2).fill(8));
-      setGameState(PLAY_STATE);
+      // setPlayedCards(Array(2).fill(null));
+      // const cards = await beginGame();
+      // setHand(cards);
+      // const opponentUp = await getOpponentCardsUp();
+      // setOpponentHand(opponentUp);
+      // setTokens(Array(2).fill(8));
+      // setGameState(PLAY_STATE);
+      setGameState(SELECT_STATE);
     }
 
     switch(gameState){
@@ -244,6 +259,9 @@ export default function Table() {
         break;
       case BET_WAIT_STATE:
         betWaitState();
+        break;
+      case FOLD_STATE:
+        foldState();
         break;
       case GAME_OVER_STATE:
         gameOverState();
@@ -268,10 +286,12 @@ export default function Table() {
   }
 
   async function handleBotStart(){
+    setPlayedCards(Array(2).fill(null));
     const cards = await beginGame();
     setHand(cards);
     const opponentUp = await getOpponentCardsUp();
     setOpponentHand(opponentUp);
+    setTokens(Array(2).fill(8));
     setGameState(PLAY_STATE);
   }
 
@@ -338,7 +358,7 @@ export default function Table() {
   }
 
   function handleFold(){
-    /* TODO */
+    setGameState(FOLD_STATE);
   }
   
   if (gameState==SELECT_STATE){
@@ -348,66 +368,66 @@ export default function Table() {
           <button className="select-button" onClick={handleBotStart}>Play Against Bot</button><button className="select-button" disabled="true">Play Against Friend</button>
         </div>
       </div>
-    )
-  }
-
-  return (
-    <div className="table">
-      {/* <text style={{display: tokens[0]==16||tokens[1]==16 ? "inline" : "none", color:"yellow",fontSize:"200px"}}>YOU {tokens[0]==16 ? "WIN!" : "LOSE..."}</text> */}
-      <div className="container" style={{marginTop:"5px"}}>
-        {/*Opponent Lives*/}
-        <div style={{position:"absolute", transform:"translateX(-180px)"}}><LivesBox lives={tokens[1]} selected={0}/></div>
-        {/*Opponent Lights*/}
-        <LightBox opponentCards={opponentHand}/>
-      </div>
-      {/*Opponent Played Card*/}
-      <div className="container" style={{marginTop:"30px"}}>
-        <LivesBox lives={tokensBet[1]}/>
-        <PlayedCard cardValue={playedCards[1]} flipState={gameState==WIN_STATE}/>
-      </div>
-      {/*Player Played Card*/}
-      <div className="container">
-        <LivesBox lives={tokensBet[0]}/>
-        <span><PlayedCard cardValue={playedCards[0]} flipState={gameState==WIN_STATE}/></span>
-      </div>
-      {/*Betting Options*/}
-      <div 
-        className="footer"
-        style={{margin:"7px", transform:"translateX(-450px)", display: gameState==BET_STATE ? "inline" : "none"}}        
-      >
-        <div style={{textAlign:"center"}}>
+    );
+  } else {
+    return (
+      <div className="table">
+        {/* <text style={{display: tokens[0]==16||tokens[1]==16 ? "inline" : "none", color:"yellow",fontSize:"200px"}}>YOU {tokens[0]==16 ? "WIN!" : "LOSE..."}</text> */}
+        <div className="container" style={{marginTop:"5px"}}>
+          {/*Opponent Lives*/}
+          <div style={{position:"absolute", transform:"translateX(-180px)"}}><LivesBox lives={tokens[1]} selected={0}/></div>
+          {/*Opponent Lights*/}
+          <LightBox opponentCards={opponentHand}/>
+        </div>
+        {/*Opponent Played Card*/}
+        <div className="container" style={{marginTop:"30px"}}>
+          <LivesBox lives={tokensBet[1]}/>
+          <PlayedCard cardValue={playedCards[1]} flipState={gameState==WIN_STATE||gameState==FOLD_STATE}/>
+        </div>
+        {/*Player Played Card*/}
+        <div className="container">
+          <LivesBox lives={tokensBet[0]}/>
+          <span><PlayedCard cardValue={playedCards[0]} flipState={gameState==WIN_STATE||gameState==FOLD_STATE}/></span>
+        </div>
+        {/*Betting Options*/}
+        <div 
+          className="footer"
+          style={{margin:"7px", transform:"translateX(-450px)", display: gameState==BET_STATE ? "inline" : "none"}}        
+        >
+          <div style={{textAlign:"center"}}>
+            <span>
+              <button onClick={handleBet}>{tokensSelected==0 ? "CHECK" : tokensSelected==prevRaise[1] ? "CALL" : "RAISE"}</button>
+              <button onClick={handleFold}>FOLD</button>
+            </span>
+          </div>
           <span>
-            <button onClick={handleBet}>{tokensSelected==0 ? "CHECK" : tokensSelected==prevRaise[1] ? "CALL" : "RAISE"}</button>
-            <button onClick={handleFold}>FOLD</button>
+            <text style={{margin:"5px", color:"WHITE", fontWeight:"bold"}}>TOKENS:</text>
+            <button onClick={() => setTokensSelected(tokensSelected-1)} disabled={tokensSelected==0}>-</button>
+            <input style={{maxWidth:"40px", minWidth:"20px"}} readOnly type="text" value={tokensSelected}/>
+            <button onClick={() => setTokensSelected(tokensSelected+1)} disabled={tokensSelected==tokens[0]}>+</button>
           </span>
         </div>
-        <span>
-          <text style={{margin:"5px", color:"WHITE", fontWeight:"bold"}}>TOKENS:</text>
-          <button onClick={() => setTokensSelected(tokensSelected-1)} disabled={tokensSelected==0}>-</button>
-          <input style={{maxWidth:"40px", minWidth:"20px"}} readOnly type="text" value={tokensSelected}/>
-          <button onClick={() => setTokensSelected(tokensSelected+1)} disabled={tokensSelected==tokens[0]}>+</button>
-        </span>
+        {/*Player Lives*/}
+        <div 
+          className="footer"
+          style={{margin:"5px", transform:"translateX(-280px) rotate(180deg)"}}
+        >
+          <LivesBox lives={tokens[0]} selected={tokensSelected}/>
+        </div>
+        {/*Player Cards*/}
+        <div className="footer">
+          <HandCard cardValue={hand[0]} selected={cardSelection[0]} onCardClick={() => handleCardClick(0)}/>
+          <HandCard cardValue={hand[1]} selected={cardSelection[1]} onCardClick={() => handleCardClick(1)}/>
+        </div>
+        <button
+          disabled={!(cardSelection[0]||cardSelection[1])}
+          onClick={handlePlayCard} 
+          className="footer" 
+          style={{margin:"7px", marginLeft:"153px", display: gameState==PLAY_STATE ? "inline" : "none"}}
+        >
+          Play Card
+        </button>
       </div>
-      {/*Player Lives*/}
-      <div 
-        className="footer"
-        style={{margin:"5px", transform:"translateX(-280px) rotate(180deg)"}}
-      >
-        <LivesBox lives={tokens[0]} selected={tokensSelected}/>
-      </div>
-      {/*Player Cards*/}
-      <div className="footer">
-        <HandCard cardValue={hand[0]} selected={cardSelection[0]} onCardClick={() => handleCardClick(0)}/>
-        <HandCard cardValue={hand[1]} selected={cardSelection[1]} onCardClick={() => handleCardClick(1)}/>
-      </div>
-      <button
-        disabled={!(cardSelection[0]||cardSelection[1])}
-        onClick={handlePlayCard} 
-        className="footer" 
-        style={{margin:"7px", marginLeft:"153px", display: gameState==PLAY_STATE ? "inline" : "none"}}
-      >
-        Play Card
-      </button>
-    </div>
-  );
+    );
+  }
 }

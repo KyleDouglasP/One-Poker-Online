@@ -80,7 +80,7 @@ public class OnePoker {
     }
 
     public void fold(){
-        /* TODO */
+        redraw();
     }
 
 }
