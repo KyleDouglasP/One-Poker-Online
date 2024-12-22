@@ -18,6 +18,20 @@
   justify-content: center;
 }
 
+.full-center-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.select-button{
+  margin: 5px;
+  height: 100px;
+  width: 300px;
+  font-size: 30px;
+  background-color: #839e91;
+}
+
 .card-outline{
   margin: 7px;
   float: left;

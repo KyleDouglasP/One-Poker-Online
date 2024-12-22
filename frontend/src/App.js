@@ -120,7 +120,7 @@ export default function Table() {
   const CALL_OR_CHECK = true;
   const RAISE = false;
 
-  const [gameState, setGameState] = useState(PLAY_STATE);
+  const [gameState, setGameState] = useState(SELECT_STATE);
   const [opponentHand, setOpponentHand] = useState(Array(2).fill(null));
   const [hand, setHand] = useState(Array(2).fill(null));
   const [cardSelection, setCardSelection] = useState(Array(2).fill(false));
@@ -267,6 +267,18 @@ export default function Table() {
     setCardSelection(newSelection);
   }
 
+  async function handleBotStart(){
+    const cards = await beginGame();
+    setHand(cards);
+    const opponentUp = await getOpponentCardsUp();
+    setOpponentHand(opponentUp);
+    setGameState(PLAY_STATE);
+  }
+
+  async function handleOnlineStart(){
+
+  }
+
   async function handlePlayCard(){
     let playedCard = null;
     const newHand = hand.slice();
@@ -329,6 +341,16 @@ export default function Table() {
     /* TODO */
   }
   
+  if (gameState==SELECT_STATE){
+    return (
+      <div className="table full-center-container">
+        <div>
+          <button className="select-button" onClick={handleBotStart}>Play Against Bot</button><button className="select-button" disabled="true">Play Against Friend</button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="table">
       {/* <text style={{display: tokens[0]==16||tokens[1]==16 ? "inline" : "none", color:"yellow",fontSize:"200px"}}>YOU {tokens[0]==16 ? "WIN!" : "LOSE..."}</text> */}

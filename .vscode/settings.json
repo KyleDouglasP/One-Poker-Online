@@ -1,3 +1,4 @@
 {
-    "jdk.project.jdkhome": ""
+    "jdk.project.jdkhome": "",
+    "java.compile.nullAnalysis.mode": "automatic"
 }
