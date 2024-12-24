@@ -108,7 +108,10 @@ export default function Table() {
 
   const BOT = 0;
   const ONLINE = 1;
-  
+
+  const [socket, setSocket] = useState(null);
+  const [socketMessage, setSocketMessage] = useState(null);
+
   const SELECT_STATE = -1;
   const PLAY_STATE = 0;
   const WAIT_STATE = 1;
@@ -118,10 +121,14 @@ export default function Table() {
   const FOLD_STATE = 5;
   const GAME_OVER_STATE = 6;
 
+  const [gameState, setGameState] = useState(SELECT_STATE);
+
   const CALL_OR_CHECK = true;
   const RAISE = false;
 
-  const [gameState, setGameState] = useState(SELECT_STATE);
+  const [prevAction, setPrevAction] = useState(Array(2).fill(RAISE));
+
+  const [mode, setMode] = useState(-1);
   const [opponentHand, setOpponentHand] = useState(Array(2).fill(null));
   const [hand, setHand] = useState(Array(2).fill(null));
   const [cardSelection, setCardSelection] = useState(Array(2).fill(false));
@@ -129,18 +136,7 @@ export default function Table() {
   const [tokens, setTokens] = useState(Array(2).fill(8));
   const [tokensSelected, setTokensSelected] = useState(1);
   const [tokensBet, setTokensBet] = useState(Array(2).fill(0));
-  const [prevAction, setPrevAction] = useState(Array(2).fill(RAISE));
   const [prevRaise, setPrevRaise] = useState(Array(2).fill(0));
-
-  // useEffect(() => {
-  //   const getData = async () => {
-  //     const cards = await beginGame();
-  //     setHand(cards);
-  //     const opponentUp = await getOpponentCardsUp();
-  //     setOpponentHand(opponentUp);
-  //   };
-  //   getData();
-  // }, []); // Empty dependency array means that useEffect only runs on the first render
 
   // UseEffect for when both cards are played to determine winner of the hand and reset
   useEffect(() => {
@@ -271,6 +267,13 @@ export default function Table() {
   },[gameState])
 
   useEffect(() => {
+    const interpretMessage = async () => {
+
+    }
+    interpretMessage();
+  }, [socketMessage])
+
+  useEffect(() => {
     const update = async () => {
       await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
       setGameState(WIN_STATE);
@@ -286,6 +289,7 @@ export default function Table() {
   }
 
   async function handleBotStart(){
+    setMode(BOT);
     setPlayedCards(Array(2).fill(null));
     const cards = await beginGame();
     setHand(cards);
@@ -296,6 +300,20 @@ export default function Table() {
   }
 
   async function handleOnlineStart(){
+    setMode(ONLINE);
+    
+    const newSocket = new WebSocket()
+    newSocket.onopen = () =>{
+
+    }
+    newSocket.onmessage = (event) => {
+      const gameUpdate = JSON.parse(event.data);
+      setSocketMessage(gameUpdate);
+    }
+    newSocket.onclose = () => {
+
+    }
+    setSocket(newSocket);
 
   }
 
@@ -365,7 +383,8 @@ export default function Table() {
     return (
       <div className="table full-center-container">
         <div>
-          <button className="select-button" onClick={handleBotStart}>Play Against Bot</button><button className="select-button" disabled="true">Play Against Friend</button>
+          <button className="select-button" onClick={handleBotStart}>Play Against Bot</button>
+          <button className="select-button" onClick={handleOnlineStart} disabled="true">Play Against Friend</button>
         </div>
       </div>
     );
