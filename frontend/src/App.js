@@ -111,6 +111,7 @@ export default function Table() {
 
   const [socket, setSocket] = useState(null);
   const [socketMessage, setSocketMessage] = useState(null);
+  const [gameID, setGameID] = useState(null);
 
   const SELECT_STATE = -1;
   const PLAY_STATE = 0;
@@ -317,6 +318,10 @@ export default function Table() {
 
   }
 
+  async function handleOnlineJoin(){
+    console.log(gameID);
+  }
+
   async function handlePlayCard(){
     let playedCard = null;
     const newHand = hand.slice();
@@ -378,13 +383,20 @@ export default function Table() {
   function handleFold(){
     setGameState(FOLD_STATE);
   }
+
+  const handleGameIDChange = (event) => {
+    setGameID(event.target.value);
+  };
   
   if (gameState==SELECT_STATE){
     return (
       <div className="table full-center-container">
         <div>
           <button className="select-button" onClick={handleBotStart}>Play Against Bot</button>
-          <button className="select-button" onClick={handleOnlineStart} disabled="true">Play Against Friend</button>
+          <div>
+            <button className="select-button" onClick={handleOnlineStart} disabled="true">Start Online Game</button>
+          </div>
+          <button className="select-button" onClick={handleOnlineJoin} disabled={!gameID}>Join Online Game <input style={{maxWidth:"80px", minWidth:"80px", textAlign:"center"}} value={gameID} onChange={handleGameIDChange} type="text" placeholder="Game Code"/></button>
         </div>
       </div>
     );
