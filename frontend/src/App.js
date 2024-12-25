@@ -112,7 +112,6 @@ export default function Table() {
   const ONLINE = 1;
 
   const [socket, setSocket] = useState(null);
-  const [socketMessage, setSocketMessage] = useState(null);
   const [gameID, setGameID] = useState(null);
 
   const SELECT_STATE = -2;
@@ -271,13 +270,6 @@ export default function Table() {
   },[gameState])
 
   useEffect(() => {
-    const interpretMessage = async () => {
-
-    }
-    interpretMessage();
-  }, [socketMessage])
-
-  useEffect(() => {
     const update = async () => {
       await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
       setGameState(WIN_STATE);
@@ -315,7 +307,7 @@ export default function Table() {
     }
     newSocket.onmessage = (event) => {
       const gameUpdate = event.data;
-      setSocketMessage(gameUpdate);
+      if(gameUpdate==="p2joined") setGameState(PLAY_STATE);
       console.log(gameUpdate);
     }
     newSocket.onclose = () => {
@@ -329,7 +321,6 @@ export default function Table() {
 
   async function handleOnlineJoin(){
     setMode(ONLINE);
-    console.log(gameID);
     const newSocket = new WebSocket(`ws://localhost:8080/game/join/${gameID}`)
     newSocket.onopen = () =>{
       setSocket(newSocket);
@@ -338,7 +329,6 @@ export default function Table() {
     }
     newSocket.onmessage = (event) => {
       const gameUpdate = event.data;
-      setSocketMessage(gameUpdate);
       console.log(gameUpdate);
     }
     newSocket.onclose = () => {

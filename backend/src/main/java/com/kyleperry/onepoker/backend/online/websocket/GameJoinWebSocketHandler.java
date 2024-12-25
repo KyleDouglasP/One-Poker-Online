@@ -34,7 +34,7 @@ public class GameJoinWebSocketHandler extends TextWebSocketHandler {
         }
         
         if (game.getState().equals("waiting-p2")) {
-            game.addPlayer2();
+            game.addPlayer2(session);
             session.sendMessage(new TextMessage("Welcome Player 2 to the game: " + gameId));
         } else {
             session.sendMessage(new TextMessage("Error: The game is already full."));
@@ -47,7 +47,8 @@ public class GameJoinWebSocketHandler extends TextWebSocketHandler {
         String uri = session.getUri().toString();
         String gameId = uri.substring(uri.lastIndexOf("/") + 1);
         System.out.println("P2 Leaving game at " + gameId);
-        gameService.getGameById(gameId).removePlayer2();
+        Game game = gameService.getGameById(gameId);
+        if (!(game==null)) game.removePlayer2();
     }
 
 }

@@ -32,7 +32,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         String gameId = uri.substring(uri.lastIndexOf("/") + 1);
         System.out.println("Opening game at " + gameId);
         
-        gameService.createGame(gameId);
+        gameService.createGame(gameId, session);
 
     }
 
