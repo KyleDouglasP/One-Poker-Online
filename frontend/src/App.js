@@ -83,14 +83,16 @@ function LivesBox({lives, selected}){
   }
   return (
     <table>
-      {lifetable.map(item => (
-        <tr>
-          <td>{item[0]}</td>
-          <td>{item[1]}</td>
-          <td>{item[2]}</td>
-          <td>{item[3]}</td>
-        </tr>
-      ))}
+      <tbody>
+        {lifetable.map((item,index) => (
+          <tr key={index}>
+            <td>{item[0]}</td>
+            <td>{item[1]}</td>
+            <td>{item[2]}</td>
+            <td>{item[3]}</td>
+          </tr>
+        ))}
+      </tbody>
     </table>
   )
 }
@@ -113,7 +115,8 @@ export default function Table() {
   const [socketMessage, setSocketMessage] = useState(null);
   const [gameID, setGameID] = useState(null);
 
-  const SELECT_STATE = -1;
+  const SELECT_STATE = -2;
+  const ONLINE_WAIT_STATE = -1
   const PLAY_STATE = 0;
   const WAIT_STATE = 1;
   const BET_STATE = 2;
@@ -302,19 +305,21 @@ export default function Table() {
 
   async function handleOnlineStart(){
     setMode(ONLINE);
-    
-    const newSocket = new WebSocket()
+    const uniqueID = crypto.randomUUID();
+    setGameID(uniqueID);
+    const newSocket = new WebSocket(`ws://localhost:8080/game/${uniqueID}`);
     newSocket.onopen = () =>{
-
+      console.log(`Websocket connection established at ws://localhost:8080/game/${uniqueID}`)
     }
     newSocket.onmessage = (event) => {
       const gameUpdate = JSON.parse(event.data);
       setSocketMessage(gameUpdate);
     }
     newSocket.onclose = () => {
-
+      console.log(`Websocket connection at ws://localhost:8080/game/${uniqueID} has been closed.`)
     }
     setSocket(newSocket);
+    setGameState(ONLINE_WAIT_STATE);
 
   }
 
@@ -394,15 +399,27 @@ export default function Table() {
         <div>
           <button className="select-button" onClick={handleBotStart}>Play Against Bot</button>
           <div>
-            <button className="select-button" onClick={handleOnlineStart} disabled="true">Start Online Game</button>
+            <button className="select-button" onClick={handleOnlineStart} >Start Online Game</button>
           </div>
-          <button className="select-button" onClick={handleOnlineJoin} disabled={!gameID}>Join Online Game <input style={{maxWidth:"80px", minWidth:"80px", textAlign:"center"}} value={gameID} onChange={handleGameIDChange} type="text" placeholder="Game Code"/></button>
+          <button className="select-button" onClick={handleOnlineJoin} disabled={!gameID}>Join Online Game</button>
+          <div><input style={{maxWidth:"1000px", minWidth:"60px", textAlign:"center"}} value={gameID ? gameID : ""} onChange={handleGameIDChange} type="text" placeholder="Game Code"/></div>
+        </div>
+      </div>
+    );
+  } else if (gameState==ONLINE_WAIT_STATE) {
+    return (
+      <div className="table full-center-container">
+        <div style={{textAlign:"center"}}>
+          <div style={{margin:"10px", backgroundColor:"#2a503d", border:"5px solid #2a503d", color:"white"}}>Waiting for Player 2 to Join!</div>
+          <div style={{backgroundColor:"#2a503d", border:"5px solid #2a503d"}}><span style={{color:"white"}}>Game Code:</span> <span style={{backgroundColor:"white", border:"3px solid black"}}>{gameID}</span></div>
+          <button style={{margin:"5px"}} onClick={() => {setGameState(SELECT_STATE); socket.close(1000); setSocket(null); setGameID(null)}}>Go Back</button>
         </div>
       </div>
     );
   } else {
     return (
       <div className="table">
+        <button style={{position:"absolute", margin:"5px"}} onClick={() => {setGameState(SELECT_STATE);}}>Go Back</button>
         {/* <text style={{display: tokens[0]==16||tokens[1]==16 ? "inline" : "none", color:"yellow",fontSize:"200px"}}>YOU {tokens[0]==16 ? "WIN!" : "LOSE..."}</text> */}
         <div className="container" style={{marginTop:"5px"}}>
           {/*Opponent Lives*/}
@@ -432,7 +449,7 @@ export default function Table() {
             </span>
           </div>
           <span>
-            <text style={{margin:"5px", color:"WHITE", fontWeight:"bold"}}>TOKENS:</text>
+            <span style={{margin:"5px", color:"WHITE", fontWeight:"bold"}}>TOKENS:</span>
             <button onClick={() => setTokensSelected(tokensSelected-1)} disabled={tokensSelected==0}>-</button>
             <input style={{maxWidth:"40px", minWidth:"20px"}} readOnly type="text" value={tokensSelected}/>
             <button onClick={() => setTokensSelected(tokensSelected+1)} disabled={tokensSelected==tokens[0]}>+</button>
