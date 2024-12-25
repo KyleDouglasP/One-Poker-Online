@@ -5,33 +5,28 @@ import com.kyleperry.onepoker.backend.game.OnePoker;
 
 public class Game {
     private String gameId; 
-    private Player player1;  
-    private Player player2; 
     private OnePoker pokerGame;  
-    private String state;  
+    private String state;
+    private String prevState;
 
-    public Game(String gameId, Player player1) {
+    public Game(String gameId) {
         this.gameId = gameId;
-        this.player1 = player1;
         this.pokerGame = new OnePoker(1); 
-        this.state = "waiting";
+        this.state = "waiting-p2";
     }
 
-    public void addPlayer(Player player2) {
-        this.player2 = player2;
+    public void addPlayer2() {
+        this.prevState = this.state;
         this.state = "in-progress";
+    }
+
+    public void removePlayer2(){
+        this.prevState = this.state;
+        this.state = "waiting-p2";
     }
 
     public String getGameId() {
         return gameId;
-    }
-
-    public Player getPlayer1(){
-        return player1;
-    }
-
-    public Player getPlayer2(){
-        return player2;
     }
 
     public OnePoker getPokerGame() {

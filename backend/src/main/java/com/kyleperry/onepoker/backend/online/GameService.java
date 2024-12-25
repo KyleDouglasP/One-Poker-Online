@@ -5,22 +5,21 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GameService {
-    
+
     private Map<String, Game> activeGames = new HashMap<>();  // Map of active games by gameId
 
     // Create a new game (for player1)
-    public Game createGame(Player player1) {
-        String gameId = UUID.randomUUID().toString();  // Generate a unique game ID
-        Game game = new Game(gameId, player1);
+    public String createGame(String gameId) {
+        Game game = new Game(gameId);
         activeGames.put(gameId, game);
-        return game;
+        return gameId;
     }
 
     // Join an existing game (for player2)
-    public Game joinGame(String gameId, Player player2) {
+    public Game joinGame(String gameId) {
         Game game = activeGames.get(gameId);
         if (game != null && game.getState().equals("waiting")) {
-            game.addPlayer(player2);
+            game.addPlayer2();
         }
         return game;
     }
@@ -30,6 +29,12 @@ public class GameService {
         return activeGames.get(gameId);
     }
 
-    // More methods to manage game lifecycle, etc.
+    public boolean containsGame(String gameId){
+        return activeGames.containsKey(gameId);
+    }
+
+    public Game removeGame(String gameId){
+        return activeGames.remove(gameId);
+    }
 }
 

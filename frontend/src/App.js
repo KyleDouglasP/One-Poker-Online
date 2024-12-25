@@ -307,24 +307,47 @@ export default function Table() {
     setMode(ONLINE);
     const uniqueID = crypto.randomUUID();
     setGameID(uniqueID);
-    const newSocket = new WebSocket(`ws://localhost:8080/game/${uniqueID}`);
+    const newSocket = new WebSocket(`ws://localhost:8080/game/create/${uniqueID}`);
     newSocket.onopen = () =>{
-      console.log(`Websocket connection established at ws://localhost:8080/game/${uniqueID}`)
+      setSocket(newSocket);
+      setGameState(ONLINE_WAIT_STATE);
+      console.log(`Websocket connection established at ws://localhost:8080/game/create/${uniqueID}`)
     }
     newSocket.onmessage = (event) => {
-      const gameUpdate = JSON.parse(event.data);
+      const gameUpdate = event.data;
       setSocketMessage(gameUpdate);
+      console.log(gameUpdate);
     }
     newSocket.onclose = () => {
-      console.log(`Websocket connection at ws://localhost:8080/game/${uniqueID} has been closed.`)
+      setGameState(SELECT_STATE);
+      setGameID(null);
+      setMode(null);
+      setSocket(null);
+      console.log(`Websocket connection at ws://localhost:8080/game/create/${uniqueID} has been closed.`)
     }
-    setSocket(newSocket);
-    setGameState(ONLINE_WAIT_STATE);
-
   }
 
   async function handleOnlineJoin(){
+    setMode(ONLINE);
     console.log(gameID);
+    const newSocket = new WebSocket(`ws://localhost:8080/game/join/${gameID}`)
+    newSocket.onopen = () =>{
+      setSocket(newSocket);
+      setGameState(PLAY_STATE);
+      console.log(`Websocket connection established at ws://localhost:8080/game/join/${gameID}`)
+    }
+    newSocket.onmessage = (event) => {
+      const gameUpdate = event.data;
+      setSocketMessage(gameUpdate);
+      console.log(gameUpdate);
+    }
+    newSocket.onclose = () => {
+      setGameState(SELECT_STATE);
+      setGameID(null);
+      setMode(null);
+      setSocket(null);
+      console.log(`Websocket connection at ws://localhost:8080/game/join/${gameID} has been closed.`)
+    }
   }
 
   async function handlePlayCard(){
@@ -397,12 +420,18 @@ export default function Table() {
     return (
       <div className="table full-center-container">
         <div>
-          <button className="select-button" onClick={handleBotStart}>Play Against Bot</button>
+          <div>
+            <button className="select-button" onClick={handleBotStart}>Play Against Bot</button>
+          </div>
           <div>
             <button className="select-button" onClick={handleOnlineStart} >Start Online Game</button>
           </div>
-          <button className="select-button" onClick={handleOnlineJoin} disabled={!gameID}>Join Online Game</button>
-          <div><input style={{maxWidth:"1000px", minWidth:"60px", textAlign:"center"}} value={gameID ? gameID : ""} onChange={handleGameIDChange} type="text" placeholder="Game Code"/></div>
+          <div>
+            <button className="select-button" onClick={handleOnlineJoin} disabled={!gameID}>Join Online Game</button>
+          </div>
+          <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+            <input style={{display:"block", margin:"5px", width:"100%", textAlign:"center"}} onChange={handleGameIDChange} type="text" placeholder="Game Code"/>
+          </div>
         </div>
       </div>
     );
@@ -410,16 +439,16 @@ export default function Table() {
     return (
       <div className="table full-center-container">
         <div style={{textAlign:"center"}}>
-          <div style={{margin:"10px", backgroundColor:"#2a503d", border:"5px solid #2a503d", color:"white"}}>Waiting for Player 2 to Join!</div>
-          <div style={{backgroundColor:"#2a503d", border:"5px solid #2a503d"}}><span style={{color:"white"}}>Game Code:</span> <span style={{backgroundColor:"white", border:"3px solid black"}}>{gameID}</span></div>
-          <button style={{margin:"5px"}} onClick={() => {setGameState(SELECT_STATE); socket.close(1000); setSocket(null); setGameID(null)}}>Go Back</button>
+          <div style={{margin:"10px", backgroundColor:"#2a503d", border:"5px solid #2a503d", borderRadius:"10px", color:"white"}}>Waiting for Player 2 to Join!</div>
+          <div style={{backgroundColor:"#2a503d", borderRadius:"10px", border:"5px solid #2a503d"}}><span style={{color:"white"}}>Game Code:</span> <span style={{backgroundColor:"white", borderRadius:"5px", border:"2px solid black"}}>{gameID}</span></div>
+          <button style={{margin:"5px"}} onClick={() => {socket.close(1000)}}>Go Back</button>
         </div>
       </div>
     );
   } else {
     return (
       <div className="table">
-        <button style={{position:"absolute", margin:"5px"}} onClick={() => {setGameState(SELECT_STATE);}}>Go Back</button>
+        <button style={{position:"absolute", margin:"5px"}} onClick={() => {mode==ONLINE ? socket.close(1000) : setGameState(SELECT_STATE)}}>Go Back</button>
         {/* <text style={{display: tokens[0]==16||tokens[1]==16 ? "inline" : "none", color:"yellow",fontSize:"200px"}}>YOU {tokens[0]==16 ? "WIN!" : "LOSE..."}</text> */}
         <div className="container" style={{marginTop:"5px"}}>
           {/*Opponent Lives*/}
