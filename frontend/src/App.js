@@ -346,12 +346,12 @@ export default function Table() {
   async function handleOnlineStart(){
     setMode(ONLINE);
     const uniqueID = generateUUID();
-    setGameID(uniqueID);
     const newSocket = new WebSocket(`ws://localhost:8080/game/create/${uniqueID}`);
     newSocket.onopen = () =>{
       setSocket(newSocket);
       setGameState(ONLINE_WAIT_STATE);
       newSocket.send("updateRequest")
+      setGameID(uniqueID);
       console.log(`Websocket connection established at ws://localhost:8080/game/create/${uniqueID}`)
     }
     newSocket.onmessage = (event) => {

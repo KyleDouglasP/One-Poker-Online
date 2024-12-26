@@ -109,7 +109,7 @@ public class Game {
                     + "\"OpponentHand1\": \"" + pokerGame.getP2OpponentCardsUp()[0] + "\","
                     + "\"OpponentHand2\": \"" + pokerGame.getP2OpponentCardsUp()[1] + "\","
                     + "\"OpponentTokens\": \"" + pokerGame.getTokens() + "\","
-                    + "\"OpponentTokensBet\": \"" + pokerGame.getP2TokensBet() + "\","
+                    + "\"OpponentTokensBet\": \"" + pokerGame.getTokensBet() + "\","
                     + "\"PreviousOpponentRaise\": \"" + pokerGame.getPreviousRaise() + "\""
                     + "}";
             }
@@ -163,7 +163,7 @@ public class Game {
             + "\"OpponentHand1\": \"" + pokerGame.getP2OpponentCardsUp()[0] + "\","
             + "\"OpponentHand2\": \"" + pokerGame.getP2OpponentCardsUp()[1] + "\","
             + "\"OpponentTokens\": \"" + pokerGame.getTokens() + "\","
-            + "\"OpponentTokensBet\": \"" + pokerGame.getP2TokensBet() + "\","
+            + "\"OpponentTokensBet\": \"" + pokerGame.getTokensBet() + "\","
             + "\"PreviousOpponentRaise\": \"" + pokerGame.getPreviousRaise() + "\""
             + "}";
         playerSessions[1].sendMessage(new TextMessage(jsonMessage));
