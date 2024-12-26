@@ -160,7 +160,7 @@ export default function Table() {
       setTokensBet(Array(2).fill(0));
 
       await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
-      if(newTokens[0]==0||newTokens[1]==0){
+      if(newTokens[0]===0||newTokens[1]===0){
         setGameState(GAME_OVER_STATE);
         return;
       }
@@ -183,7 +183,7 @@ export default function Table() {
       setTokensBet(Array(2).fill(0));
 
       await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
-      if(newTokens[0]==0||newTokens[1]==0){
+      if(newTokens[0]===0||newTokens[1]===0){
         setGameState(GAME_OVER_STATE);
         return;
       }
@@ -237,7 +237,7 @@ export default function Table() {
       setGameState(BET_STATE);
     }
 
-    if(mode==BOT){
+    if(mode===BOT){
       switch(gameState){
         case WIN_STATE:
           winState();
@@ -261,7 +261,7 @@ export default function Table() {
       await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
       setGameState(WIN_STATE);
     }
-    if(prevAction[0]==CALL_OR_CHECK && prevAction[1]==CALL_OR_CHECK) update();
+    if(prevAction[0]===CALL_OR_CHECK && prevAction[1]===CALL_OR_CHECK) update();
   }, [prevAction]);
 
   function handleCardClick(cardNumber){
@@ -391,7 +391,7 @@ export default function Table() {
 
   async function handlePlayCard(){
     
-    if(mode==BOT){
+    if(mode===BOT){
       let playedCard = null;
       const newHand = hand.slice();
       
@@ -427,11 +427,11 @@ export default function Table() {
   }
 
   function handleBet(){
-    if(mode==BOT){ 
+    if(mode===BOT){ 
       const newPrevRaise = prevRaise.slice();
       const newPrevAction = prevAction.slice();
 
-      if (tokensSelected==prevRaise[1]){
+      if (tokensSelected===prevRaise[1]){
         newPrevRaise[0] = 0;
         newPrevAction[0] = CALL_OR_CHECK;
       } else {
@@ -456,7 +456,7 @@ export default function Table() {
   }
 
   function handleFold(){
-    if(mode==BOT) setGameState(FOLD_STATE);
+    if(mode===BOT) setGameState(FOLD_STATE);
     else socket.send("fold");
   }
 
@@ -464,7 +464,7 @@ export default function Table() {
     setGameID(event.target.value);
   };
   
-  if (gameState==SELECT_STATE){
+  if (gameState===SELECT_STATE){
     return (
       <div className="table full-center-container">
         <div>
@@ -483,7 +483,7 @@ export default function Table() {
         </div>
       </div>
     );
-  } else if (gameState==ONLINE_WAIT_STATE) {
+  } else if (gameState===ONLINE_WAIT_STATE) {
     return (
       <div className="table full-center-container">
         <div style={{textAlign:"center"}}>
@@ -493,15 +493,15 @@ export default function Table() {
         </div>
       </div>
     );
-  } else if (gameState==GAME_OVER_STATE){
+  } else if (gameState===GAME_OVER_STATE){
     return (
       <div className="table full-center-container">
         <div>
           <div style={{textAlign:"center"}}>
-            <span className="game-over-text">You {tokens[0]==16 ? "Won!" : "Lost..."}</span>
+            <span className="game-over-text">You {tokens[0]===16 ? "Won!" : "Lost..."}</span>
           </div>
           <div>
-            <button className="select-button" onClick={() => {mode==ONLINE ? socket.close(1000) : setGameState(SELECT_STATE)}}>Go Home</button>
+            <button className="select-button" onClick={() => {mode===ONLINE ? socket.close(1000) : setGameState(SELECT_STATE)}}>Go Home</button>
           </div>
         </div>
       </div>
@@ -509,8 +509,8 @@ export default function Table() {
   } else {
     return (
       <div className="table">
-        <button style={{position:"absolute", margin:"5px"}} onClick={() => {mode==ONLINE ? socket.close(1000) : setGameState(SELECT_STATE)}}>Go Back</button>
-        {/* <text style={{display: tokens[0]==16||tokens[1]==16 ? "inline" : "none", color:"yellow",fontSize:"200px"}}>YOU {tokens[0]==16 ? "WIN!" : "LOSE..."}</text> */}
+        <button style={{position:"absolute", margin:"5px"}} onClick={() => {mode===ONLINE ? socket.close(1000) : setGameState(SELECT_STATE)}}>Go Back</button>
+        {/* <text style={{display: tokens[0]===16||tokens[1]===16 ? "inline" : "none", color:"yellow",fontSize:"200px"}}>YOU {tokens[0]===16 ? "WIN!" : "LOSE..."}</text> */}
         <div className="container" style={{marginTop:"5px"}}>
           {/*Opponent Lives*/}
           <div style={{position:"absolute", transform:"translateX(-180px)"}}><LivesBox lives={tokens[1]} selected={0}/></div>
@@ -520,29 +520,29 @@ export default function Table() {
         {/*Opponent Played Card*/}
         <div className="container" style={{marginTop:"30px"}}>
           <LivesBox lives={tokensBet[1]}/>
-          <PlayedCard cardValue={playedCards[1]} flipState={gameState==WIN_STATE||gameState==FOLD_STATE}/>
+          <PlayedCard cardValue={playedCards[1]} flipState={gameState===WIN_STATE||gameState===FOLD_STATE}/>
         </div>
         {/*Player Played Card*/}
         <div className="container">
           <LivesBox lives={tokensBet[0]}/>
-          <span><PlayedCard cardValue={playedCards[0]} flipState={gameState==WIN_STATE||gameState==FOLD_STATE}/></span>
+          <span><PlayedCard cardValue={playedCards[0]} flipState={gameState===WIN_STATE||gameState===FOLD_STATE}/></span>
         </div>
         {/*Betting Options*/}
         <div 
           className="footer"
-          style={{margin:"7px", transform:"translateX(-450px)", display: gameState==BET_STATE ? "inline" : "none"}}        
+          style={{margin:"7px", transform:"translateX(-450px)", display: gameState===BET_STATE ? "inline" : "none"}}        
         >
           <div style={{textAlign:"center"}}>
             <span>
-              <button onClick={handleBet}>{tokensSelected==0 ? "CHECK" : tokensSelected==prevRaise[1] ? "CALL" : "RAISE"}</button>
+              <button onClick={handleBet}>{tokensSelected===0 ? "CHECK" : tokensSelected===prevRaise[1] ? "CALL" : "RAISE"}</button>
               <button onClick={handleFold}>FOLD</button>
             </span>
           </div>
           <span>
             <span style={{margin:"5px", color:"WHITE", fontWeight:"bold"}}>TOKENS:</span>
-            <button onClick={() => setTokensSelected(tokensSelected-1)} disabled={tokensSelected==prevRaise[1]}>-</button>
+            <button onClick={() => setTokensSelected(tokensSelected-1)} disabled={tokensSelected===prevRaise[1]}>-</button>
             <input style={{maxWidth:"40px", minWidth:"20px"}} readOnly type="text" value={tokensSelected}/>
-            <button onClick={() => setTokensSelected(tokensSelected+1)} disabled={tokensSelected==tokens[0] || (prevAction[1]==CALL_OR_CHECK&&tokensSelected==tokens[1]) || (prevAction[1]==RAISE&&tokensSelected==prevRaise[1]+tokens[1])}>+</button>
+            <button onClick={() => setTokensSelected(tokensSelected+1)} disabled={tokensSelected===tokens[0] || (prevAction[1]===CALL_OR_CHECK&&tokensSelected===tokens[1]) || (prevAction[1]===RAISE&&tokensSelected===prevRaise[1]+tokens[1])}>+</button>
           </span>
         </div>
         {/*Player Lives*/}
@@ -561,7 +561,7 @@ export default function Table() {
           disabled={!(cardSelection[0]||cardSelection[1])}
           onClick={handlePlayCard} 
           className="footer" 
-          style={{margin:"7px", marginLeft:"153px", display: gameState==PLAY_STATE ? "inline" : "none"}}
+          style={{margin:"7px", marginLeft:"153px", display: gameState===PLAY_STATE ? "inline" : "none"}}
         >
           Play Card
         </button>
