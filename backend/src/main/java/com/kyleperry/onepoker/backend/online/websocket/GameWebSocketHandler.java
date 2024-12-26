@@ -67,6 +67,5 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             pokerGame.betTokens(Integer.parseInt(action.substring(action.lastIndexOf("bet")+3)));
             game.broadcastGameStateAll();
         } 
-        /* TODO: Handle game actions based on the received message */
     }
 }
