@@ -249,22 +249,26 @@ export default function Table() {
       setGameState(SELECT_STATE);
     }
 
-    switch(gameState){
-      case WIN_STATE:
-        winState();
-        break;
-      case WAIT_STATE:
-        waitState();
-        break;
-      case BET_WAIT_STATE:
-        betWaitState();
-        break;
-      case FOLD_STATE:
-        foldState();
-        break;
-      case GAME_OVER_STATE:
-        gameOverState();
-        break;
+    if(mode==BOT){
+      switch(gameState){
+        case WIN_STATE:
+          winState();
+          break;
+        case WAIT_STATE:
+          waitState();
+          break;
+        case BET_WAIT_STATE:
+          betWaitState();
+          break;
+        case FOLD_STATE:
+          foldState();
+          break;
+        case GAME_OVER_STATE:
+          gameOverState();
+          break;
+      }
+    } else if (mode==ONLINE){
+      socket.send("updateRequest");
     }
 
   },[gameState])
@@ -295,6 +299,42 @@ export default function Table() {
     setGameState(PLAY_STATE);
   }
 
+  function interpretMessage(gameUpdate){
+    if(gameUpdate.type === "UPDATE"){
+      
+      const newHand = hand.slice();
+      newHand[0]=gameUpdate.Card1;
+      newHand[1]=gameUpdate.Card2;
+
+      const newLights = opponentHand.slice();
+      newLights[0]=(gameUpdate.OpponentHand1==="true");
+      newLights[1]=(gameUpdate.OpponentHand2==="true");
+
+      const newTokens = tokens.slice();
+      newTokens[0]=(gameUpdate.Tokens);
+      newTokens[1]=(gameUpdate.OpponentTokens);
+
+      const newTokensBet = tokensBet.slice();
+      newTokensBet[0]=(gameUpdate.TokensBet);
+      newTokensBet[1]=(gameUpdate.OpponentTokensBet)
+
+      const newPlayedCards = playedCards.slice();
+
+      setHand(newHand);
+      setTokens(newTokens);
+      setTokensBet(newTokensBet);
+
+      if(!(gameUpdate.PlayedCard==="null")) newPlayedCards[0]=gameUpdate.PlayedCard;
+      if(gameUpdate.OpponentPlayedCard==="null") setOpponentHand(newLights);
+      else newPlayedCards[1]=gameUpdate.OpponentPlayedCard;
+
+      setPlayedCards(newPlayedCards);
+      
+    } else if (gameUpdate.message==="p2joined"){
+      setGameState(PLAY_STATE);
+    } else console.log(gameUpdate.message);
+  }
+
   async function handleOnlineStart(){
     setMode(ONLINE);
     const uniqueID = crypto.randomUUID();
@@ -306,9 +346,8 @@ export default function Table() {
       console.log(`Websocket connection established at ws://localhost:8080/game/create/${uniqueID}`)
     }
     newSocket.onmessage = (event) => {
-      const gameUpdate = event.data;
-      if(gameUpdate==="p2joined") setGameState(PLAY_STATE);
-      console.log(gameUpdate);
+      const gameUpdate = JSON.parse(event.data);
+      interpretMessage(gameUpdate);
     }
     newSocket.onclose = () => {
       setGameState(SELECT_STATE);
@@ -319,6 +358,7 @@ export default function Table() {
     }
   }
 
+
   async function handleOnlineJoin(){
     setMode(ONLINE);
     const newSocket = new WebSocket(`ws://localhost:8080/game/join/${gameID}`)
@@ -328,8 +368,8 @@ export default function Table() {
       console.log(`Websocket connection established at ws://localhost:8080/game/join/${gameID}`)
     }
     newSocket.onmessage = (event) => {
-      const gameUpdate = event.data;
-      console.log(gameUpdate);
+      const gameUpdate = JSON.parse(event.data);
+      interpretMessage(gameUpdate);
     }
     newSocket.onclose = () => {
       setGameState(SELECT_STATE);

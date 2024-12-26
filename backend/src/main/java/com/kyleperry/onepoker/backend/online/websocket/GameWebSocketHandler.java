@@ -46,15 +46,15 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    public void handleTextMessage(WebSocketSession session, TextMessage message) {
+    public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         String uri = session.getUri().toString();
         String gameId = uri.substring(uri.lastIndexOf("/") + 1);
         Game game = gameService.getGameById(gameId);  // Get the game instance by gameId
 
         OnePoker pokerGame = game.getPokerGame();
-
         String action = message.getPayload();
 
+        if(action.equals("updateRequest")) game.broadcastGameState(session);
         /* TODO: Handle game actions based on the received message */
     }
 }

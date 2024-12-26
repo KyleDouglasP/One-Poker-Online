@@ -23,6 +23,8 @@ public class OnePoker {
     public OnePoker(int mode){
         player1Tokens=8;
         player2Tokens=8;
+        player1BetTokens=0;
+        player2BetTokens=0;
         mainDeck = new Deck();
         player1Cards = new Card[] {mainDeck.draw(),mainDeck.draw()};
         player2Cards = new Card[] {mainDeck.draw(),mainDeck.draw()};
