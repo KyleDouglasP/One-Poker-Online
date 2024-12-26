@@ -346,12 +346,12 @@ export default function Table() {
   async function handleOnlineStart(){
     setMode(ONLINE);
     const uniqueID = generateUUID();
-    setGameID(uniqueID);
     const newSocket = new WebSocket(`ws://localhost:8080/game/create/${uniqueID}`);
     newSocket.onopen = () =>{
       setSocket(newSocket);
       setGameState(ONLINE_WAIT_STATE);
       newSocket.send("updateRequest")
+      setGameID(uniqueID);
       console.log(`Websocket connection established at ws://localhost:8080/game/create/${uniqueID}`)
     }
     newSocket.onmessage = (event) => {
@@ -472,7 +472,7 @@ export default function Table() {
             <button className="select-button" onClick={handleBotStart}>Play Against Bot</button>
           </div>
           <div>
-            <button className="select-button" onClick={handleOnlineStart} >Start Online Game</button>
+            <button className="select-button" onClick={handleOnlineStart}>Start Online Game</button>
           </div>
           <div>
             <button className="select-button" onClick={handleOnlineJoin} disabled={!gameID}>Join Online Game</button>

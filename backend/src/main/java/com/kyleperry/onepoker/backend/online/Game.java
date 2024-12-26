@@ -1,10 +1,8 @@
 package com.kyleperry.onepoker.backend.online;
 
 import java.io.IOException;
-import java.net.http.WebSocket;
 import java.util.Map;
 
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties.Websocket;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -16,7 +14,6 @@ public class Game {
     private OnePoker pokerGame;
     private WebSocketSession[] playerSessions = new WebSocketSession[2];
     private String state;
-    private String prevState;
 
     public Game(String gameId, WebSocketSession session) {
         this.playerSessions[0]=session;
@@ -27,14 +24,12 @@ public class Game {
 
     public void addPlayer2(WebSocketSession session) throws IOException {
         this.playerSessions[1]=session;
-        this.prevState = this.state;
         this.state = "in-progress";
         pokerGame.setState("play");
         broadcast("message", "p2joined", playerSessions[0]);
     }
 
     public void removePlayer2(){
-        this.prevState = this.state;
         this.state = "waiting-p2";
     }
 
@@ -114,7 +109,7 @@ public class Game {
                     + "\"OpponentHand1\": \"" + pokerGame.getP2OpponentCardsUp()[0] + "\","
                     + "\"OpponentHand2\": \"" + pokerGame.getP2OpponentCardsUp()[1] + "\","
                     + "\"OpponentTokens\": \"" + pokerGame.getTokens() + "\","
-                    + "\"OpponentTokensBet\": \"" + pokerGame.getP2TokensBet() + "\","
+                    + "\"OpponentTokensBet\": \"" + pokerGame.getTokensBet() + "\","
                     + "\"PreviousOpponentRaise\": \"" + pokerGame.getPreviousRaise() + "\""
                     + "}";
             }
@@ -168,7 +163,7 @@ public class Game {
             + "\"OpponentHand1\": \"" + pokerGame.getP2OpponentCardsUp()[0] + "\","
             + "\"OpponentHand2\": \"" + pokerGame.getP2OpponentCardsUp()[1] + "\","
             + "\"OpponentTokens\": \"" + pokerGame.getTokens() + "\","
-            + "\"OpponentTokensBet\": \"" + pokerGame.getP2TokensBet() + "\","
+            + "\"OpponentTokensBet\": \"" + pokerGame.getTokensBet() + "\","
             + "\"PreviousOpponentRaise\": \"" + pokerGame.getPreviousRaise() + "\""
             + "}";
         playerSessions[1].sendMessage(new TextMessage(jsonMessage));

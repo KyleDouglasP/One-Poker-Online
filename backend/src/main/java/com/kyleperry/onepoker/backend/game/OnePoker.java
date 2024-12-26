@@ -16,7 +16,7 @@ public class OnePoker {
     private Card player1PlayedCard;
     private int player1Tokens;
     private int player1BetTokens;
-    private boolean player1PreviousAction; /* TODO: Setup backend logic for raise turn tracking */
+    private boolean player1PreviousAction;
     private int player1PreviousRaise;
     private boolean player1Fold = false;
 

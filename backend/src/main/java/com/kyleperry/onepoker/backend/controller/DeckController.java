@@ -40,13 +40,10 @@ public class DeckController {
 
     @GetMapping("/api/handwinner")
     public int getWinnerOfHand(){
-        /* TODO */
         int comparison = game.decideWinner();
         if (comparison==1) return 1;
         else if (comparison==-1) return -1;
         else return 0;
     }
-
-    /* TODO */
     
 }
