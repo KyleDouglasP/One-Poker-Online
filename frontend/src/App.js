@@ -542,7 +542,7 @@ export default function Table() {
             <span style={{margin:"5px", color:"WHITE", fontWeight:"bold"}}>TOKENS:</span>
             <button onClick={() => setTokensSelected(tokensSelected-1)} disabled={tokensSelected==prevRaise[1]}>-</button>
             <input style={{maxWidth:"40px", minWidth:"20px"}} readOnly type="text" value={tokensSelected}/>
-            <button onClick={() => setTokensSelected(tokensSelected+1)} disabled={tokensSelected==tokens[0]}>+</button>
+            <button onClick={() => setTokensSelected(tokensSelected+1)} disabled={tokensSelected==tokens[0] || (prevAction[1]==CALL_OR_CHECK&&tokensSelected==tokens[1]) || (prevAction[1]==RAISE&&tokensSelected==prevRaise[1]+tokens[1])}>+</button>
           </span>
         </div>
         {/*Player Lives*/}
