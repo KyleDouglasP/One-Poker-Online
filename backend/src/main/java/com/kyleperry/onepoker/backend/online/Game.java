@@ -75,6 +75,7 @@ public class Game {
                 if(state.equals("p1bet")) state = "bet";
                 if(state.equals("p2bet")) state = "bet-wait";
                 if(state.equals("decide-winner")) state = "decide-winner";
+                if(state.equals("game-over")) state = "game-over";
 
                 jsonMessage = "{"
                     + "\"type\": \"UPDATE\","
@@ -99,6 +100,7 @@ public class Game {
                 if(state.equals("p1bet")) state = "bet-wait";
                 if(state.equals("p2bet")) state = "bet";
                 if(state.equals("decide-winner")) state = "decide-winner";
+                if(state.equals("game-over")) state = "game-over";
 
                 jsonMessage = "{"
                     + "\"type\": \"UPDATE\","
@@ -130,6 +132,7 @@ public class Game {
         if(state.equals("p1bet")) returnState = "bet";
         if(state.equals("p2bet")) returnState = "bet-wait";
         if(state.equals("decide-winner")) returnState = "decide-winner";
+        if(state.equals("game-over")) returnState = "game-over";
         jsonMessage = "{"
             + "\"type\": \"UPDATE\","
             + "\"state\": \"" + returnState + "\","
@@ -152,6 +155,7 @@ public class Game {
         if(state.equals("p1bet")) returnState = "bet-wait";
         if(state.equals("p2bet")) returnState = "bet";
         if(state.equals("decide-winner")) returnState = "decide-winner";
+        if(state.equals("game-over")) returnState = "game-over";
         jsonMessage = "{"
             + "\"type\": \"UPDATE\","
             + "\"state\": \"" + returnState + "\","

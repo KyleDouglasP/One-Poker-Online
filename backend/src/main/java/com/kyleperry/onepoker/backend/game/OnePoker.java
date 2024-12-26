@@ -199,8 +199,7 @@ public class OnePoker {
         player2PreviousRaise=0;
         player1PreviousAction=RAISE;
         player2PreviousAction=RAISE;
-        if(player1Tokens==16) state = "p1win";
-        else if (player2Tokens==16) state = "p2win";
+        if(player1Tokens==16 || player2Tokens==16) state = "game-over";
         else state = "play";
         redraw();
         return true;

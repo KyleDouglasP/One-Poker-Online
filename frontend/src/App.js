@@ -237,18 +237,6 @@ export default function Table() {
       setGameState(BET_STATE);
     }
 
-    const gameOverState = async () => {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
-      // setPlayedCards(Array(2).fill(null));
-      // const cards = await beginGame();
-      // setHand(cards);
-      // const opponentUp = await getOpponentCardsUp();
-      // setOpponentHand(opponentUp);
-      // setTokens(Array(2).fill(8));
-      // setGameState(PLAY_STATE);
-      setGameState(SELECT_STATE);
-    }
-
     if(mode==BOT){
       switch(gameState){
         case WIN_STATE:
@@ -262,9 +250,6 @@ export default function Table() {
           break;
         case FOLD_STATE:
           foldState();
-          break;
-        case GAME_OVER_STATE:
-          gameOverState();
           break;
       }
     }
@@ -298,10 +283,8 @@ export default function Table() {
   }
 
   async function interpretMessage(socket, gameUpdate){
-    console.log("Socket state in interpretMessage:", socket ? socket.readyState : "socket is null");
-    console.log("Received data:", gameUpdate);
     if(gameUpdate.type === "UPDATE"){
-      
+      console.log("gamestate is: " + gameUpdate.state)
       const newHand = hand.slice();
       newHand[0]=(gameUpdate.Card1==="null" ? null : gameUpdate.Card1);
       newHand[1]=(gameUpdate.Card2==="null" ? null : gameUpdate.Card2);
@@ -322,7 +305,6 @@ export default function Table() {
 
       const newPrevRaise = prevRaise.slice();
       newPrevRaise[1]=parseInt(gameUpdate.PreviousOpponentRaise);
-      console.log("Opponent previous raise:"+ parseInt(gameUpdate.PreviousOpponentRaise));
 
       setHand(newHand);
       setTokens(newTokens);
@@ -343,11 +325,9 @@ export default function Table() {
         setTokensSelected(0);
         setGameState(WAIT_STATE);
       } else if (state==="bet"){
-        console.log("WE ARE IN BET STATE");
         setTokensSelected(parseInt(gameUpdate.PreviousOpponentRaise));
         setGameState(BET_STATE);
       } else if (state==="bet-wait"){
-        console.log("WE ARE IN BET-WAIT STATE");
         setTokensSelected(0);
         setGameState(BET_WAIT_STATE);
       } else if (state==="decide-winner"){
@@ -356,6 +336,8 @@ export default function Table() {
         setGameState(WIN_STATE);
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
         socket.send("winHand");
+      } else if (state==="game-over"){
+        setGameState(GAME_OVER_STATE);
       }
       
     } else console.log(gameUpdate.message);
@@ -508,6 +490,19 @@ export default function Table() {
           <div style={{margin:"10px", backgroundColor:"#2a503d", border:"5px solid #2a503d", borderRadius:"10px", color:"white"}}>Waiting for Player 2 to Join!</div>
           <div style={{backgroundColor:"#2a503d", borderRadius:"10px", border:"5px solid #2a503d"}}><span style={{color:"white"}}>Game Code:</span> <span style={{backgroundColor:"white", borderRadius:"5px", border:"2px solid black"}}>{gameID}</span></div>
           <button style={{margin:"5px"}} onClick={() => {socket.close(1000)}}>Go Back</button>
+        </div>
+      </div>
+    );
+  } else if (gameState==GAME_OVER_STATE){
+    return (
+      <div className="table full-center-container">
+        <div>
+          <div style={{textAlign:"center"}}>
+            <span className="game-over-text">You {tokens[0]==16 ? "Won!" : "Lost..."}</span>
+          </div>
+          <div>
+            <button className="select-button" onClick={() => {mode==ONLINE ? socket.close(1000) : setGameState(SELECT_STATE)}}>Go Home</button>
+          </div>
         </div>
       </div>
     );
