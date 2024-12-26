@@ -55,6 +55,21 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         String action = message.getPayload();
 
         if(action.equals("updateRequest")) game.broadcastGameState(session);
+        else if(action.equals("playcard0")) {
+            pokerGame.playCard(0);
+            game.broadcastGameStateAll();
+        } else if(action.equals("playcard1")){
+            pokerGame.playCard(1);
+            game.broadcastGameStateAll();
+        } else if(action.equals("winHand")){
+            if(pokerGame.winHand()) game.broadcastGameStateAll();
+        } else if(action.equals("fold")){
+            pokerGame.fold();
+            game.broadcastGameStateAll();
+        } else if(action.contains("bet")){
+            pokerGame.betTokens(Integer.parseInt(action.substring(action.lastIndexOf("bet")+3)));
+            game.broadcastGameStateAll();
+        } 
         /* TODO: Handle game actions based on the received message */
     }
 }

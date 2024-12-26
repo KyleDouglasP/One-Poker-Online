@@ -22,7 +22,7 @@ public class Card implements Comparable<Card>{
     }
 
     @Override
-    /* Returns 1 if first card wins, 2 if second card wins, 0 if they draw */
+    /* Returns 1 if first card wins, -1 if second card wins, 0 if they draw */
     public int compareTo(Card card){
         if(this.rank==2 && card.rank==14) return 1;
         if(this.rank==14 && card.rank==2) return -1;

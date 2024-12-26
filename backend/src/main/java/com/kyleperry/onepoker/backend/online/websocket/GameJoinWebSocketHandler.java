@@ -52,6 +52,7 @@ public class GameJoinWebSocketHandler extends TextWebSocketHandler {
             "message", ("Welcome Player 2 to the game: " + gameId)
             ));
             session.sendMessage(new TextMessage(jsonMessage));
+            game.broadcastGameStateAll();
         } else {
             jsonMessage = objectMapper.writeValueAsString(Map.of(
             "type", "ERROR",
@@ -81,6 +82,20 @@ public class GameJoinWebSocketHandler extends TextWebSocketHandler {
         String action = message.getPayload();
 
         if(action.equals("updateRequest")) game.broadcastGameState(session);
+        else if(action.equals("playcard0")) {
+            pokerGame.P2PlayCard(0);
+            game.broadcastGameStateAll();
+        } else if(action.equals("playcard1")){
+            pokerGame.P2PlayCard(1);
+            game.broadcastGameStateAll();
+        } else if(action.equals("winHand")){
+        } else if(action.equals("fold")){
+            pokerGame.P2Fold();
+            game.broadcastGameStateAll();
+        } else if(action.contains("bet")){
+            pokerGame.P2BetTokens(Integer.parseInt(action.substring(action.lastIndexOf("bet")+3)));
+            game.broadcastGameStateAll();
+        } 
         /* TODO: Handle game actions based on the received message */
     }
 

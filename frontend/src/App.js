@@ -267,8 +267,6 @@ export default function Table() {
           gameOverState();
           break;
       }
-    } else if (mode==ONLINE){
-      socket.send("updateRequest");
     }
 
   },[gameState])
@@ -299,39 +297,67 @@ export default function Table() {
     setGameState(PLAY_STATE);
   }
 
-  function interpretMessage(gameUpdate){
+  async function interpretMessage(socket, gameUpdate){
+    console.log("Socket state in interpretMessage:", socket ? socket.readyState : "socket is null");
+    console.log("Received data:", gameUpdate);
     if(gameUpdate.type === "UPDATE"){
       
       const newHand = hand.slice();
-      newHand[0]=gameUpdate.Card1;
-      newHand[1]=gameUpdate.Card2;
+      newHand[0]=(gameUpdate.Card1==="null" ? null : gameUpdate.Card1);
+      newHand[1]=(gameUpdate.Card2==="null" ? null : gameUpdate.Card2);
 
       const newLights = opponentHand.slice();
       newLights[0]=(gameUpdate.OpponentHand1==="true");
       newLights[1]=(gameUpdate.OpponentHand2==="true");
 
       const newTokens = tokens.slice();
-      newTokens[0]=(gameUpdate.Tokens);
-      newTokens[1]=(gameUpdate.OpponentTokens);
+      newTokens[0]=parseInt(gameUpdate.Tokens);
+      newTokens[1]=parseInt(gameUpdate.OpponentTokens);
 
       const newTokensBet = tokensBet.slice();
-      newTokensBet[0]=(gameUpdate.TokensBet);
-      newTokensBet[1]=(gameUpdate.OpponentTokensBet)
+      newTokensBet[0]=parseInt(gameUpdate.TokensBet);
+      newTokensBet[1]=parseInt(gameUpdate.OpponentTokensBet)
 
       const newPlayedCards = playedCards.slice();
+
+      const newPrevRaise = prevRaise.slice();
+      newPrevRaise[1]=parseInt(gameUpdate.PreviousOpponentRaise);
+      console.log("Opponent previous raise:"+ parseInt(gameUpdate.PreviousOpponentRaise));
 
       setHand(newHand);
       setTokens(newTokens);
       setTokensBet(newTokensBet);
+      setPrevRaise(newPrevRaise);
 
       if(!(gameUpdate.PlayedCard==="null")) newPlayedCards[0]=gameUpdate.PlayedCard;
       if(gameUpdate.OpponentPlayedCard==="null") setOpponentHand(newLights);
       else newPlayedCards[1]=gameUpdate.OpponentPlayedCard;
 
       setPlayedCards(newPlayedCards);
+
+      const state = gameUpdate.state;
+      if(state==="play"){
+        setTokensSelected(1);
+        setGameState(PLAY_STATE);
+      } else if (state==="wait") {
+        setTokensSelected(0);
+        setGameState(WAIT_STATE);
+      } else if (state==="bet"){
+        console.log("WE ARE IN BET STATE");
+        setTokensSelected(parseInt(gameUpdate.PreviousOpponentRaise));
+        setGameState(BET_STATE);
+      } else if (state==="bet-wait"){
+        console.log("WE ARE IN BET-WAIT STATE");
+        setTokensSelected(0);
+        setGameState(BET_WAIT_STATE);
+      } else if (state==="decide-winner"){
+        setGameState(BET_WAIT_STATE);
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+        setGameState(WIN_STATE);
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+        socket.send("winHand");
+      }
       
-    } else if (gameUpdate.message==="p2joined"){
-      setGameState(PLAY_STATE);
     } else console.log(gameUpdate.message);
   }
 
@@ -343,11 +369,12 @@ export default function Table() {
     newSocket.onopen = () =>{
       setSocket(newSocket);
       setGameState(ONLINE_WAIT_STATE);
+      newSocket.send("updateRequest")
       console.log(`Websocket connection established at ws://localhost:8080/game/create/${uniqueID}`)
     }
     newSocket.onmessage = (event) => {
       const gameUpdate = JSON.parse(event.data);
-      interpretMessage(gameUpdate);
+      interpretMessage(newSocket, gameUpdate);
     }
     newSocket.onclose = () => {
       setGameState(SELECT_STATE);
@@ -364,12 +391,12 @@ export default function Table() {
     const newSocket = new WebSocket(`ws://localhost:8080/game/join/${gameID}`)
     newSocket.onopen = () =>{
       setSocket(newSocket);
-      setGameState(PLAY_STATE);
+      newSocket.send("updateRequest")
       console.log(`Websocket connection established at ws://localhost:8080/game/join/${gameID}`)
     }
     newSocket.onmessage = (event) => {
       const gameUpdate = JSON.parse(event.data);
-      interpretMessage(gameUpdate);
+      interpretMessage(newSocket, gameUpdate);
     }
     newSocket.onclose = () => {
       setGameState(SELECT_STATE);
@@ -381,65 +408,74 @@ export default function Table() {
   }
 
   async function handlePlayCard(){
-    let playedCard = null;
-    const newHand = hand.slice();
-    if(cardSelection[0]){
-      playedCard = hand[0];
-      newHand[0]=null;
-      await playCard(0);
-    }
-    else if(cardSelection[1]){
-      playedCard = hand[1];
-      newHand[1]=null;
-      await playCard(1);
-    }
-    else return;
+    
+    if(mode==BOT){
+      let playedCard = null;
+      const newHand = hand.slice();
+      
+      if(cardSelection[0]){
+        playedCard = hand[0];
+        newHand[0]=null;
+        await playCard(0);
+      }
+      else if(cardSelection[1]){
+        playedCard = hand[1];
+        newHand[1]=null;
+        await playCard(1);
+      }
+      else return;
+      const newTokensBet = tokensBet.slice();
+      newTokensBet[0]=1;
+      const newTokens = tokens.slice();
+      newTokens[0]--;
+      setTokens(newTokens)
+      setTokensBet(newTokensBet);
+      setHand(newHand);
 
+      const newPlayedCards = playedCards.slice();
+      newPlayedCards[0]=playedCard;
+      setPlayedCards(newPlayedCards);
+
+      setGameState(WAIT_STATE);
+    } else {
+      socket.send(`playcard${cardSelection[0] ? 0 : 1}`);
+    }
     setTokensSelected(0);
-    const newTokensBet = tokensBet.slice();
-    newTokensBet[0]=1;
-    const newTokens = tokens.slice();
-    newTokens[0]--;
-    setTokens(newTokens)
-    setTokensBet(newTokensBet);
-    setHand(newHand);
-
-    const newPlayedCards = playedCards.slice();
-    newPlayedCards[0]=playedCard;
     setCardSelection(Array(2).fill(false));
-    setPlayedCards(newPlayedCards);
-
-    setGameState(WAIT_STATE);
-
   }
 
   function handleBet(){
-    const newPrevRaise = prevRaise.slice();
-    const newPrevAction = prevAction.slice();
+    if(mode==BOT){ 
+      const newPrevRaise = prevRaise.slice();
+      const newPrevAction = prevAction.slice();
 
-    if (tokensSelected==prevRaise[1]){
-      newPrevRaise[0] = 0;
-      newPrevAction[0] = CALL_OR_CHECK;
+      if (tokensSelected==prevRaise[1]){
+        newPrevRaise[0] = 0;
+        newPrevAction[0] = CALL_OR_CHECK;
+      } else {
+        newPrevRaise[0] = tokensSelected;
+        newPrevAction[0] = RAISE;
+      }
+
+      setPrevRaise(newPrevRaise);
+      const newTokensBet = tokensBet.slice();
+      const newTokens = tokens.slice();
+      newTokensBet[0]=tokensBet[0]+tokensSelected;
+      newTokens[0]=tokens[0]-tokensSelected;
+      setTokensBet(newTokensBet);
+      setTokens(newTokens);
+      setTokensSelected(0);
+
+      setPrevAction(newPrevAction);
+      setGameState(BET_WAIT_STATE);
     } else {
-      newPrevRaise[0] = tokensSelected;
-      newPrevAction[0] = RAISE;
+      socket.send(`bet${tokensSelected}`)
     }
-
-    setPrevRaise(newPrevRaise);
-    const newTokensBet = tokensBet.slice();
-    const newTokens = tokens.slice();
-    newTokensBet[0]=tokensBet[0]+tokensSelected;
-    newTokens[0]=tokens[0]-tokensSelected;
-    setTokensBet(newTokensBet);
-    setTokens(newTokens);
-    setTokensSelected(0);
-
-    setPrevAction(newPrevAction);
-    setGameState(BET_WAIT_STATE);
   }
 
   function handleFold(){
-    setGameState(FOLD_STATE);
+    if(mode==BOT) setGameState(FOLD_STATE);
+    else socket.send("fold");
   }
 
   const handleGameIDChange = (event) => {
@@ -509,7 +545,7 @@ export default function Table() {
           </div>
           <span>
             <span style={{margin:"5px", color:"WHITE", fontWeight:"bold"}}>TOKENS:</span>
-            <button onClick={() => setTokensSelected(tokensSelected-1)} disabled={tokensSelected==0}>-</button>
+            <button onClick={() => setTokensSelected(tokensSelected-1)} disabled={tokensSelected==prevRaise[1]}>-</button>
             <input style={{maxWidth:"40px", minWidth:"20px"}} readOnly type="text" value={tokensSelected}/>
             <button onClick={() => setTokensSelected(tokensSelected+1)} disabled={tokensSelected==tokens[0]}>+</button>
           </span>
