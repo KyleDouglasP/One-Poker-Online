@@ -5,15 +5,12 @@ import com.kyleperry.onepoker.backend.online.Game;
 import com.kyleperry.onepoker.backend.online.GameService;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketHandler;
 
 @Component  // Make it a Spring Bean
 public class GameWebSocketHandler extends TextWebSocketHandler {

@@ -472,7 +472,7 @@ export default function Table() {
             <button className="select-button" onClick={handleBotStart}>Play Against Bot</button>
           </div>
           <div>
-            <button className="select-button" onClick={handleOnlineStart} >Start Online Game</button>
+            <button className="select-button" onClick={handleOnlineStart}>Start Online Game</button>
           </div>
           <div>
             <button className="select-button" onClick={handleOnlineJoin} disabled={!gameID}>Join Online Game</button>
