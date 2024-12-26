@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { beginGame, getOpponentCardsUp, getOpponentPlayedCard, playCard, getWinner, getPlayerHand } from "./services/api";
-import { cardToAsset } from "./utils/util";
+import { cardToAsset, generateUUID} from "./utils/util";
 
 
 function HandCard({ selected, cardValue, onCardClick }){
@@ -345,7 +345,7 @@ export default function Table() {
 
   async function handleOnlineStart(){
     setMode(ONLINE);
-    const uniqueID = crypto.randomUUID();
+    const uniqueID = generateUUID();
     setGameID(uniqueID);
     const newSocket = new WebSocket(`ws://localhost:8080/game/create/${uniqueID}`);
     newSocket.onopen = () =>{
