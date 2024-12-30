@@ -23,7 +23,7 @@ npm start
 ```bash
 mvn spring-boot:run
 ```
-You can now locally test any changes to the frontend at [http://localhost:3000/](http://localhost:3000/)
+You can now locally test any changes to the frontend or backend at [http://localhost:3000/](http://localhost:3000/)
 
 ## Contributing
 
