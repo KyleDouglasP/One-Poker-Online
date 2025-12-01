@@ -2,6 +2,16 @@ import { useState, useEffect } from "react";
 import { beginGame, getOpponentCardsUp, getOpponentPlayedCard, playCard, getWinner, getPlayerHand } from "./services/api";
 import { cardToAsset, generateUUID} from "./utils/util";
 
+function CopyButton({textToCopy}){
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(textToCopy);
+  }
+
+  return (
+    <button style={{margin:"5px"}} onClick={handleCopy}>Copy to Clipboard</button>
+  )
+}
 
 function HandCard({ selected, cardValue, onCardClick }){
   
@@ -346,13 +356,13 @@ export default function Table() {
   async function handleOnlineStart(){
     setMode(ONLINE);
     const uniqueID = generateUUID();
-    const newSocket = new WebSocket(`wss://localhost:8080/game/create/${uniqueID}`);
+    const newSocket = new WebSocket(`ws://localhost:8080/game/create/${uniqueID}`);
     newSocket.onopen = () =>{
       setSocket(newSocket);
       setGameState(ONLINE_WAIT_STATE);
       newSocket.send("updateRequest")
       setGameID(uniqueID);
-      console.log(`Websocket connection established at wss://localhost:8080/game/create/${uniqueID}`)
+      console.log(`Websocket connection established at ws://localhost:8080/game/create/${uniqueID}`)
     }
     newSocket.onmessage = (event) => {
       const gameUpdate = JSON.parse(event.data);
@@ -363,18 +373,18 @@ export default function Table() {
       setGameID(null);
       setMode(null);
       setSocket(null);
-      console.log(`Websocket connection at wss://localhost:8080/game/create/${uniqueID} has been closed.`)
+      console.log(`Websocket connection at ws://localhost:8080/game/create/${uniqueID} has been closed.`)
     }
   }
 
 
   async function handleOnlineJoin(){
     setMode(ONLINE);
-    const newSocket = new WebSocket(`wss://localhost:8080/game/join/${gameID}`)
+    const newSocket = new WebSocket(`ws://localhost:8080/game/join/${gameID}`)
     newSocket.onopen = () =>{
       setSocket(newSocket);
       newSocket.send("updateRequest")
-      console.log(`Websocket connection established at wss://localhost:8080/game/join/${gameID}`)
+      console.log(`Websocket connection established at ws://localhost:8080/game/join/${gameID}`)
     }
     newSocket.onmessage = (event) => {
       const gameUpdate = JSON.parse(event.data);
@@ -385,7 +395,7 @@ export default function Table() {
       setGameID(null);
       setMode(null);
       setSocket(null);
-      console.log(`Websocket connection at wss://localhost:8080/game/join/${gameID} has been closed.`)
+      console.log(`Websocket connection at ws://localhost:8080/game/join/${gameID} has been closed.`)
     }
   }
 
@@ -489,7 +499,8 @@ export default function Table() {
         <div style={{textAlign:"center"}}>
           <div style={{margin:"10px", backgroundColor:"#2a503d", border:"5px solid #2a503d", borderRadius:"10px", color:"white"}}>Waiting for Player 2 to Join!</div>
           <div style={{backgroundColor:"#2a503d", borderRadius:"10px", border:"5px solid #2a503d"}}><span style={{color:"white"}}>Game Code:</span> <span style={{backgroundColor:"white", borderRadius:"5px", border:"2px solid black"}}>{gameID}</span></div>
-          <button style={{margin:"5px"}} onClick={() => {socket.close(1000)}}>Go Back</button>
+          <div><CopyButton textToCopy={gameID}/></div>
+          <button style={{marginTop:"20px"}} onClick={() => {socket.close(1000)}}>Go Back</button>
         </div>
       </div>
     );
