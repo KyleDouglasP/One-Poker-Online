@@ -9,7 +9,7 @@ function CopyButton({textToCopy}){
   }
 
   return (
-    <button style={{margin:"5px"}} onClick={handleCopy}>Copy to Clipboard</button>
+    <button style={{margin:"10px"}} onClick={handleCopy}>Copy to Clipboard</button>
   )
 }
 
