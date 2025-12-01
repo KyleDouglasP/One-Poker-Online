@@ -346,13 +346,13 @@ export default function Table() {
   async function handleOnlineStart(){
     setMode(ONLINE);
     const uniqueID = generateUUID();
-    const newSocket = new WebSocket(`ws://localhost:8080/game/create/${uniqueID}`);
+    const newSocket = new WebSocket(`wss://localhost:8080/game/create/${uniqueID}`);
     newSocket.onopen = () =>{
       setSocket(newSocket);
       setGameState(ONLINE_WAIT_STATE);
       newSocket.send("updateRequest")
       setGameID(uniqueID);
-      console.log(`Websocket connection established at ws://localhost:8080/game/create/${uniqueID}`)
+      console.log(`Websocket connection established at wss://localhost:8080/game/create/${uniqueID}`)
     }
     newSocket.onmessage = (event) => {
       const gameUpdate = JSON.parse(event.data);
@@ -363,18 +363,18 @@ export default function Table() {
       setGameID(null);
       setMode(null);
       setSocket(null);
-      console.log(`Websocket connection at ws://localhost:8080/game/create/${uniqueID} has been closed.`)
+      console.log(`Websocket connection at wss://localhost:8080/game/create/${uniqueID} has been closed.`)
     }
   }
 
 
   async function handleOnlineJoin(){
     setMode(ONLINE);
-    const newSocket = new WebSocket(`ws://localhost:8080/game/join/${gameID}`)
+    const newSocket = new WebSocket(`wss://localhost:8080/game/join/${gameID}`)
     newSocket.onopen = () =>{
       setSocket(newSocket);
       newSocket.send("updateRequest")
-      console.log(`Websocket connection established at ws://localhost:8080/game/join/${gameID}`)
+      console.log(`Websocket connection established at wss://localhost:8080/game/join/${gameID}`)
     }
     newSocket.onmessage = (event) => {
       const gameUpdate = JSON.parse(event.data);
@@ -385,7 +385,7 @@ export default function Table() {
       setGameID(null);
       setMode(null);
       setSocket(null);
-      console.log(`Websocket connection at ws://localhost:8080/game/join/${gameID} has been closed.`)
+      console.log(`Websocket connection at wss://localhost:8080/game/join/${gameID} has been closed.`)
     }
   }
 
